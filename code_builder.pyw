@@ -2,7 +2,7 @@
 # 06/11/18
 # This will be used to generate the actual code for the user
 
-import time_tools as tt
+import general_tools as gt
 
 def generate_template(proj_name, proj_comments, proj_author, identifiers, data):
     
@@ -10,7 +10,7 @@ def generate_template(proj_name, proj_comments, proj_author, identifiers, data):
 
     # --Generate comments for the top of the file--
     content += "# " + proj_name
-    content += "# " + tt.short_date + "/n"
+    content += "# " + gt.short_date + "/n"
     content += "# " + proj_author + "/n"
     content += "# Generated with tkEditor\n\n"
 
@@ -54,7 +54,6 @@ def widget_translate(data):
         total = instantiation + place + methods + bindings
 
         translated += [total]
-
     return translated
 
 def root_translate(data):
@@ -87,7 +86,7 @@ def root_translate(data):
     for protocol in data[4]:
         protocols += identifier + ".protocol(" + protocol + ")\n"
 
-    translated = instantiation + methods + bindings + protocols
+    translated = instantiation + methods + bindings + protocols + "\n"
 
     return translated
     
@@ -96,26 +95,43 @@ def generate_class(class_ident, root_data, widg_data):
     root_identifier = root_data[1]
 
     # This variable contains a single indent (4 spaces)
-    i = "   "
+    i = "    "
 
     # --Generate the class' declaration--
     class_text += "class " + class_ident + ":\n"
 
+    # --Generate the constructor's declaration--
+    class_text += i + "def __init__(self):\n\n"
+
     # --If implemented, control variables should go here--
 
     # --Root instantiation--
-    class_text += i + "# Set up the window"
-    class_text += i + root_translate(root_data)
+    class_text += i + i + "# Set up the window\n"
+    class_text += gt.indent(gt.indent(root_translate(root_data)))
 
     # --Set up image resources--
 
     # --Instantiate widgets--
-    class_text += i + "# Set up widgets"
-    class_text += i + widget_translate(widg_data)
+    class_text += i + i + "# Set up widgets\n"
+    class_text += gt.unlistify(gt.indent(gt.indent(widget_translate(widg_data))))
 
     # --Start mainloop--
-    class_text += i + root_identifier + ".mainloop()"
+    class_text += i + i + "# Start mainloop\n"
+    class_text += i + i + root_identifier + ".mainloop()"
 
     return class_text
 
-print(generate(["tk.Tk", "root", [], ["<Button-1>, dummyI"], ["\"WM_DELETE_WINDOW\", dummyII"]]))
+#print(generate_class("tester",["tk.Tk", "root", [], ["<Button-1>, dummyI"], ["\"WM_DELETE_WINDOW\", dummyII"]], ))
+
+print(generate_class("CLASS",
+               ["tk.Tk", "root", ["geometry('500x500')", "title('Test Window')"], 
+                                 [],
+                                 []],
+               [["ttk.Button", "btn_a", "root", "x = 50", "y = 50", ["text = 'Click Me'"],
+                                                                   [],
+                                                                   []]]))
+"""
+print(gt.indent(widget_translate([["ttk.Button", "btn_a", "root", "x = 50", "y = 50", ["text = 'Click Me'"],
+                                                                   [],
+                                                                   []]]))[0])
+"""

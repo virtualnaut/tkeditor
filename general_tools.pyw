@@ -8,9 +8,9 @@ import time
 # This will be used to read the CSV file which contains the properties
 #   and names of the widgets.
 
-def csv_parse(path, separator = ","):
+def csv_parse(path, delimiter = ","):
     # 'path' is the location of the txt/csv file in the file system.
-    # 'separator' is the character that has been used in the file
+    # 'delimiter' is the character that has been used in the file
     #   to separate the values, default is a comma for csv files.
 
     # --Open the file--
@@ -36,7 +36,7 @@ def csv_parse(path, separator = ","):
     for line in lines:
         line.replace("\n", "")
 
-    # --Split the lines apart at the commas (or at the separators)--
+    # --Split the lines apart at the delimiters--
     fully_split = []
     
     for line in lines:
@@ -46,12 +46,12 @@ def csv_parse(path, separator = ","):
         # Iterate through each character in the line.
         for char in range(0, len(line)):
         
-            # If a separator is found or if the end of the line is reached,
+            # If a delimiter is found or if the end of the line is reached,
             #   append value 'values' and update 'last_sep'.
-            if (line[char] == separator) or (char == (len(line) - 1)):
+            if (line[char] == delimiter) or (char == (len(line) - 1)):
 
                 # If it isn't the first value in the list, cut of the
-                #   first character as it will be a separator. Otherwise, don't.
+                #   first character as it will be a delimiter. Otherwise, don't.
                 if char == 0:
                     values += [line[last_sep:char]]
                 else:
@@ -83,3 +83,48 @@ def short_date():
         mon = "0" + mon
 
     return(day + "/" + mon + "/" + yr)
+
+# Puts a 4 space indent before each of the elements in the
+#   list that is passed in
+
+def indent(text):
+    # 'text' should be of type string or list and is the text
+    #   which will be indented.
+    
+    # 4 space indent
+    INDENT = "    "
+
+    # Handle strings and lists separately
+    if type(text) == str:
+
+        # Put an indent after every newline, and one at the start
+        indented = INDENT + (text.replace("\n", "\n" + INDENT))
+
+        # Cut off extra indent from end and return
+        return(indented[0:-4])
+    
+    elif type(text) == list:
+        
+        indented = []
+
+        # For each of the elements, add indents as with a string, and append to 'indented'
+        for element in text:
+            indented += [(INDENT + (element.replace("\n", "\n" + INDENT))[0:-4])]
+        return(indented)
+    
+    else:
+        # If the argument is not of an acceptable type
+        raise Exception("This function allows strings and lists only")
+
+def unlistify(text):
+    # 'text' should be the list which is to be converted to a
+    #   string
+
+    # String will be stored here
+    string_text = ""
+
+    # For each of the elements, concatenate it to 'string_text'
+    for element in text:
+        string_text += element
+
+    return(string_text)
