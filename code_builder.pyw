@@ -19,7 +19,7 @@ def generate_template(proj_name, proj_comments, proj_author, identifiers, data):
         content += generate_class()
 
 def widget_translate(data):
-    # Data should be a list of the format found in "./data_spec.txt".
+    # Data should be a list of the format found in "./specs/data_spec.txt".
 
     # This will be where all of the translated code will go:
     translated = []
@@ -57,7 +57,7 @@ def widget_translate(data):
     return translated
 
 def root_translate(data):
-    # Data should be a list of the format found in "./root_spec.txt".
+    # Data should be a list of the format found in "./specs/root_spec.txt".
 
     # This will be where all of the translated code will go:
     translated = []
