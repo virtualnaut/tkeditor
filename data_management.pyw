@@ -61,6 +61,19 @@ class data_manager:
             self.location[widget_identifier] = len(self.widgets) - 1
         else:
             raise IdentifierUsed("A widget using that identifier already exists.")
+
+class tree_management:
+    def __init__(self, tree):
+        pass
+
+    def __get_props(self, wi):
+        pass
+        
+    def add_widget(self, widget_class, widget_identifier):
+        pass
+
+    def conf_widget(self):
+        pass
 """
 x = data_manager("tk.Tk", "self.r")
 x.add_widget("ttk.Button", "self.b", "self.r", 223, 452, [], [], [])
