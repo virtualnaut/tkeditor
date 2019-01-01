@@ -6,6 +6,7 @@ from tkinter import ttk
 import data_management as data
 import widgets as widg
 import general_tools as gt
+import defaults
 
 # The window where widget arrangement etc. happens
 class display_window:
@@ -24,23 +25,32 @@ class display_window:
         #self.root.iconbitmap()         # Window's icon
         self.root.title("Untitled")     # The title of the window
 
+        # Set up deselection
+        self.root.bind()#DESELECTION BIND
+
         # Canvas where dotted selection boxes etc will appear
-        self.canv = tk.Canvas(self.root, width = 500, height = 400)
-        self.canv.place(x = 0, y = 0)
+        self.effect_canv = tk.Canvas(self.root, width = 500, height = 400)
+        self.effect_canv.place(x = 0, y = 0)
 
     def refresh(self):
         #self.widgets = []
 
-        # Delete the old widgets
+        # Delete the old widgets and update coords
         for key in self.disp_widg.keys():
+            self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
+            self.widget_manager.edit_widget(key, "y", self.disp_widg[key].y)
+            
             self.disp_widg[key].destroy()
 
         self.disp_widg = {}
 
         for widget in self.widget_manager.widgets:
 
-            self.disp_widg[widget[1]] = widg.movable(widget[0], self.root, **gt.keyword_convert(widget[5]))
-            self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]), y = int((widget[4].replace(" ",""))[2:]))
+            self.disp_widg[widget[1]] = widg.movable(widget[0], self.root, self.effect_canv,
+                                                     **gt.keyword_convert(widget[5]))
+            
+            self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
+                                            y = int((widget[4].replace(" ",""))[2:]))
 
 # The widget explorer
 class tree_ui:
@@ -171,10 +181,12 @@ class add_ui:
 
     def __add(self, calling_widget):
         self.widgets.add_widget(calling_widget, "widget_" + str(self.counter), self.widgets.root[1],
-                                x = 5, y = 5)
+                                x = 5, y = 5, properties = defaults.gen(calling_widget))
+        
         self.counter += 1
         self.display.refresh()
-
+        #import sys
+        #print(sys.stdout)
 
 class menu_ui():
     def __init__(self):

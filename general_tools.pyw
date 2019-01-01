@@ -142,7 +142,6 @@ def keyword_convert(properties):
     for prop in properties:
         key = prop[:locate(prop, "=")]
         key = key.replace(" ","")
-        print(key)
 
         val = prop[locate(prop, "=")+1:]
         if val[0] == " ":

@@ -1,7 +1,6 @@
 # Main File
 import data_management as data
-import ui
-import threading
+import ui, threading
 
 widget_manager = data.data_manager("tk", "root")
 

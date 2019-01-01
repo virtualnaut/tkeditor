@@ -2,11 +2,13 @@ import tkinter as tk
 from tkinter import ttk
 
 class mobiliser:
-    def __init__(self, tkWidget, double_clk = False):
+    def __init__(self, tkWidget, effects, double_clk = False):
         self.inner = tkWidget
         self.grab = [None, None]
         self.selected = False
         self.double_clk = double_clk
+        self.effects = effects
+        mobiliser.s = "disabled"
 
         # Set up bindings
         self.inner.bind("<B1-Motion>", self.__drag)
@@ -24,11 +26,20 @@ class mobiliser:
         grab_y = (self.inner.master.winfo_pointery() - self.inner.master.winfo_rooty()) - self.grab[1]
 
         #print(str(self.curr_x + grab_x), str(self.curr_y + grab_y))
+        self.inner.x = grab_x
+        self.inner.y = grab_y
         self.inner.place(x = grab_x, y = grab_y)
+
+        self.effects.delete("all")
+        self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
+                                     (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
+                                     (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
+                                      dash = (3,3))
         
     def __click(self, event):
         self.select()
         self.__grab(event)
+        print(self.selected)
             
     def __grab(self, event):
         self.grab[0] = event.x
@@ -36,21 +47,28 @@ class mobiliser:
     
     def select(self):
         #self.inner.config(style = self.inner.selected_style_name)
+        self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
+                                     (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
+                                     (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
+                                     dash = (3,3))
         self.selected = True
         
     def deselect(self, event):
+        
         if event.widget != self.inner:
             #self.inner.config(style = self.inner.style_name)
+            self.effects.delete("all")
             self.selected = False
             if self.double_clk:
                 self.inner.state(["disabled"])
-
+        print(self.selected)
+        
     def __enable(self):
         print("!")
         self.inner.state(["!disabled"])
     
 class mButton(ttk.Button):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, effects, **kwargs):
         # Properties
         self.prop_dict = kwargs
         self.x = 0
@@ -71,7 +89,7 @@ class mButton(ttk.Button):
         super().__init__(parent, **kwargs)
 
         # Set up bindings and their commands
-        self.movement = mobiliser(self)
+        self.movement = mobiliser(self, effects)
 
     def __kwarg_validate(self, values):
         # If one of the arguments' keywords is not in 'valid', raise TypeError
@@ -91,7 +109,7 @@ class mButton(ttk.Button):
         super().place(x = x, y = y)
 
 class mCheckbutton(ttk.Checkbutton):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, effects, **kwargs):
         # Properties
         self.prop_dict = kwargs
         self.x = 0
@@ -110,7 +128,10 @@ class mCheckbutton(ttk.Checkbutton):
         super().__init__(parent, **kwargs)
 
         # Set up bindings and their commands
-        self.movement = mobiliser(self)
+        self.movement = mobiliser(self, effects, double_clk = True)
+
+        self.state(["disabled"])
+        self.invoke()
 
     def __kwarg_validate(self, values):
         # If one of the arguments' keywords is not in 'valid', raise TypeError
@@ -130,7 +151,7 @@ class mCheckbutton(ttk.Checkbutton):
         super().place(x = x, y = y)
 
 class mCombobox(ttk.Combobox):
-    def __init__(self, parent, **kwargs):
+    def __init__(self, parent, effects, **kwargs):
         # Properties
         self.prop_dict = kwargs
         self.x = 0
@@ -149,7 +170,7 @@ class mCombobox(ttk.Combobox):
         super().__init__(parent, **kwargs)
 
         # Set up bindings and their commands
-        self.movement = mobiliser(self, double_clk = True)
+        self.movement = mobiliser(self, effects, double_clk = True)
 
         self.state(["disabled"])
 
@@ -170,9 +191,11 @@ class mCombobox(ttk.Combobox):
         self.y = y
         super().place(x = x, y = y)
 
-def movable(widget_type, parent, **kwargs):
+def movable(widget_type, parent, effects, **kwargs):
     if widget_type == "ttk.Button":
-        return mButton(parent, **kwargs)
+        return mButton(parent, effects, **kwargs)
+    if widget_type == "ttk.Checkbutton":
+        return mCheckbutton(parent, effects, **kwargs)
 
 def debug():
     r=tk.Tk()
