@@ -8,6 +8,8 @@ class data_manager:
     def __init__(self, win_type, root_identifier):
         self.widgets = []
 
+        # Dictionary of index in self.widgets where a certain widget is stored
+        # identifier : index
         self.location = {}
         
         self.root = [win_type, root_identifier, [], [], []]
@@ -84,3 +86,7 @@ x.edit_widget("self.b", "i", "b")
 print(x.location)
 print(x.widgets)
 """
+
+x=data_manager("tk.Tk", "self.r")
+x.add_widget("ttk.Button", "self.b", "self.r", 223, 452, [], [], [])
+print(x.widgets)

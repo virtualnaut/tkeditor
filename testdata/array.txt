@@ -1,4 +1,0 @@
-[
-["ttk.Button","b1","root","x=0","y=0",["text = 'This is a Button'"],["invoke()"],["'<Space>', tools.func"]],
-["ttk.Label","l1","root","x=50","y=50",["text = 'This is a Label'"],[],[]]
-]
