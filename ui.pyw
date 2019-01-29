@@ -26,7 +26,7 @@ class display_window:
         self.root.title("Untitled")     # The title of the window
 
         # Set up deselection
-        self.root.bind()#DESELECTION BIND
+        self.root.bind("<Button-1>", self.deselect)
 
         # Canvas where dotted selection boxes etc will appear
         self.effect_canv = tk.Canvas(self.root, width = 500, height = 400)
@@ -51,6 +51,11 @@ class display_window:
             
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
+            
+    def deselect(self, event):
+        if event.widget == self.effect_canv:
+            for key in self.disp_widg.keys():
+                self.disp_widg[key].movement.deselect()
 
 # The widget explorer
 class tree_ui:

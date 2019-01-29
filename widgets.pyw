@@ -8,15 +8,13 @@ class mobiliser:
         self.selected = False
         self.double_clk = double_clk
         self.effects = effects
-        mobiliser.s = "disabled"
 
         # Set up bindings
         self.inner.bind("<B1-Motion>", self.__drag)
         self.inner.bind("<ButtonPress-1>", self.__click)
-        self.inner.master.bind("<Button-1>", self.deselect)
 
         if self.double_clk:
-            self.inner.bind("<Double-Button-1>", lambda event: self.__enable())
+            self.inner.bind("<Double-Button-1>", lambda event: self.enable())
 
     def dummy(self, event):
         print(event.__dict__)
@@ -24,8 +22,7 @@ class mobiliser:
     def __drag(self, event):
         grab_x = (self.inner.master.winfo_pointerx() - self.inner.master.winfo_rootx()) - self.grab[0]
         grab_y = (self.inner.master.winfo_pointery() - self.inner.master.winfo_rooty()) - self.grab[1]
-
-        #print(str(self.curr_x + grab_x), str(self.curr_y + grab_y))
+        
         self.inner.x = grab_x
         self.inner.y = grab_y
         self.inner.place(x = grab_x, y = grab_y)
@@ -34,7 +31,7 @@ class mobiliser:
         self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
                                      (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
                                      (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
-                                      dash = (3,3))
+                                     dash = (3,3), outline = "#00a3ff")
         
     def __click(self, event):
         self.select()
@@ -46,14 +43,14 @@ class mobiliser:
         self.grab[1] = event.y
     
     def select(self):
-        #self.inner.config(style = self.inner.selected_style_name)
         self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
                                      (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
                                      (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
-                                     dash = (3,3))
+                                     dash = (3,3), outline = "#00a3ff")
         self.selected = True
-        
-    def deselect(self, event):
+    
+    """
+    def deselect_old(self, event):
         
         if event.widget != self.inner:
             #self.inner.config(style = self.inner.style_name)
@@ -62,8 +59,15 @@ class mobiliser:
             if self.double_clk:
                 self.inner.state(["disabled"])
         print(self.selected)
+    """
         
-    def __enable(self):
+    def deselect(self):
+        self.effects.delete("all")
+        self.selected = False
+        if self.double_clk:
+            self.inner.state(["disabled"])        
+        
+    def enable(self):
         print("!")
         self.inner.state(["!disabled"])
     
@@ -129,9 +133,10 @@ class mCheckbutton(ttk.Checkbutton):
 
         # Set up bindings and their commands
         self.movement = mobiliser(self, effects, double_clk = True)
-
-        self.state(["disabled"])
+        
         self.invoke()
+        self.state(["disabled"])
+        
 
     def __kwarg_validate(self, values):
         # If one of the arguments' keywords is not in 'valid', raise TypeError
