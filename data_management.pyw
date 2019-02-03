@@ -106,16 +106,16 @@ class data_manager:
             return True
         else:
             return value
+"""      
+class selection_manager:
+    def __init__(self, select_ui):
+        self.states = {}
+    
+    def modify(self, indentifier, state):
+        if type(state) == bool:
+            self.states[identifier] = state
+        else:
+            raise ValueError("Argument 'state' must be a bool.")
         
-class tree_management:
-    def __init__(self, tree):
-        pass
-
-    def __get_props(self, wi):
-        pass
-        
-    def add_widget(self, widget_class, widget_identifier):
-        pass
-
-    def conf_widget(self):
-        pass
+    def nudge(self):
+"""     

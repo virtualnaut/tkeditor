@@ -1,74 +1,69 @@
 import tkinter as tk
 from tkinter import ttk
+import time
 
 class mobiliser:
     def __init__(self, tkWidget, effects, double_clk = False):
+
+        
+        # The actual tkinter widget
         self.inner = tkWidget
-        self.grab = [None, None]
-        self.selected = False
-        self.double_clk = double_clk
-        self.effects = effects
+
+        self.grab = [None, None]        # Where on the widget the user has pressed btn1 down
+        self.selected = False           # Is the widget selected?
+        self.double_clk = double_clk    # Can the widget be altered via a double click?
+        self.effects = effects          # Canvas where selection effects are displayed
 
         # Set up bindings
-        self.inner.bind("<B1-Motion>", self.__drag)
-        self.inner.bind("<ButtonPress-1>", self.__click)
+        self.inner.bind("<B1-Motion>", lambda event: self.__drag())
+        self.inner.bind("<ButtonPress-1>", self.__grab)
 
         if self.double_clk:
             self.inner.bind("<Double-Button-1>", lambda event: self.enable())
+        
+    def __drag(self):
+        # Calculate the new location of the widget relative the the root window's origin
+        new_loc_x = (self.inner.master.winfo_pointerx() - self.inner.master.winfo_rootx()) - self.grab[0]
+        new_loc_y = (self.inner.master.winfo_pointery() - self.inner.master.winfo_rooty()) - self.grab[1]
 
-    def dummy(self, event):
-        print(event.__dict__)
-        
-    def __drag(self, event):
-        grab_x = (self.inner.master.winfo_pointerx() - self.inner.master.winfo_rootx()) - self.grab[0]
-        grab_y = (self.inner.master.winfo_pointery() - self.inner.master.winfo_rooty()) - self.grab[1]
-        
-        self.inner.x = grab_x
-        self.inner.y = grab_y
-        self.inner.place(x = grab_x, y = grab_y)
+        # Set the properties of the inner widget to match
+        self.inner.x = new_loc_x
+        self.inner.y = new_loc_y
 
-        self.effects.delete("all")
-        self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
-                                     (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
-                                     (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
-                                     dash = (3,3), outline = "#00a3ff")
-        
-    def __click(self, event):
-        self.select()
-        self.__grab(event)
-        print(self.selected)
-            
+        # Update the display
+        self.inner.place(x = new_loc_x, y = new_loc_y)
+
+        self.deselect()
+
     def __grab(self, event):
+        # Store the location that the widget is grabbed and select the widget
+        self.select()
+        
         self.grab[0] = event.x
         self.grab[1] = event.y
     
     def select(self):
+        # Select the widget and display selection effect
+        self.__select_effect()
+        self.selected = True
+
+    def deselect(self):
+        # Remove all effects and deselect
+        self.effects.delete("all")
+        self.selected = False
+
+        # If the widget can be double clicked, disable the widget
+        if self.double_clk:
+            self.inner.state(["disabled"])
+
+    def __select_effect(self):
+        self.effects.delete("all")
         self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
                                      (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
                                      (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
-                                     dash = (3,3), outline = "#00a3ff")
-        self.selected = True
-    
-    """
-    def deselect_old(self, event):
-        
-        if event.widget != self.inner:
-            #self.inner.config(style = self.inner.style_name)
-            self.effects.delete("all")
-            self.selected = False
-            if self.double_clk:
-                self.inner.state(["disabled"])
-        print(self.selected)
-    """
-        
-    def deselect(self):
-        self.effects.delete("all")
-        self.selected = False
-        if self.double_clk:
-            self.inner.state(["disabled"])        
+                                     dash = (3,3), outline = "#00a3ff") 
         
     def enable(self):
-        print("!")
         self.inner.state(["!disabled"])
     
 class mButton(ttk.Button):
@@ -119,12 +114,6 @@ class mCheckbutton(ttk.Checkbutton):
         self.x = 0
         self.y = 0
         
-        # Styling
-        self.__select_style = ttk.Style()
-        self.__select_style.configure("Selected.TCheckbutton", background = "orange")
-        self.style_name = "TCheckbutton"
-        self.selected_style_name = "Selected.TCheckbutton"
-        
         # Raise an error if an invalid keyword is given
         self.__kwarg_validate(kwargs)
 
@@ -162,12 +151,6 @@ class mCombobox(ttk.Combobox):
         self.x = 0
         self.y = 0
         
-        # Styling
-        self.__select_style = ttk.Style()
-        self.__select_style.configure("Selected.TCombobox", foreground = "orange")
-        self.style_name = "TCombobox"
-        self.selected_style_name = "Selected.TCombobox"
-        
         # Raise an error if an invalid keyword is given
         self.__kwarg_validate(kwargs)
 
@@ -201,6 +184,8 @@ def movable(widget_type, parent, effects, **kwargs):
         return mButton(parent, effects, **kwargs)
     if widget_type == "ttk.Checkbutton":
         return mCheckbutton(parent, effects, **kwargs)
+    if widget_type == "ttk.Combobox":
+        return mCombobox(parent, effects, **kwargs)
 
 def debug():
     r=tk.Tk()

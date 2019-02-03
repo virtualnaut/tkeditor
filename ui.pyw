@@ -8,16 +8,33 @@ import widgets as widg
 import general_tools as gt
 import defaults
 
+class base:
+    def __init__(self):
+        # Instantiate the root window
+        self.root = tk.Tk()
+    
+        # Set default values for the root window
+        self.root.geometry("500x400")   # Size of the window
+    
+        #self.root.iconbitmap()         # Window's icon
+        self.root.title("Ufasfd")     # The title of the window
+        
+    def begin(self):
+        self.root.mainloop()
+        
+
 # The window where widget arrangement etc. happens
 class display_window:
-    def __init__(self, widget_manager):
+    def __init__(self, widget_manager, selection_ui):
 
         #self.widgets = []
         self.disp_widg = {}
         self.widget_manager = widget_manager
+        
+        self.selection_ui = selection_ui
 
         # Instantiate the root window
-        self.root = tk.Tk()
+        self.root = tk.Toplevel()
 
         # Set default values for the root window
         self.root.geometry("500x400")   # Size of the window
@@ -26,15 +43,16 @@ class display_window:
         self.root.title("Untitled")     # The title of the window
 
         # Set up deselection
-        self.root.bind("<Button-1>", self.deselect)
+        #self.root.bind("<Button-1>", self.deselect)
+        self.root.bind("<Button-1>", self.possible_selection)
 
-        # Canvas where dotted selection boxes etc will appear
+        # Canvas where selection boxes etc will appear
         self.effect_canv = tk.Canvas(self.root, width = 500, height = 400)
         self.effect_canv.place(x = 0, y = 0)
+        
+        #self.root.mainloop()
 
     def refresh(self):
-        #self.widgets = []
-
         # Delete the old widgets and update coords
         for key in self.disp_widg.keys():
             self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
@@ -42,20 +60,38 @@ class display_window:
             
             self.disp_widg[key].destroy()
 
+        # Redraw the widgets as they were
         self.disp_widg = {}
-
         for widget in self.widget_manager.widgets:
 
+            # Instantiate the widget
             self.disp_widg[widget[1]] = widg.movable(widget[0], self.root, self.effect_canv,
                                                      **gt.keyword_convert(widget[5]))
-            
+
+            # Put the widget in the correct place, removing the "x=" part and any spaces
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
             
-    def deselect(self, event):
+        #self.root.mainloop()
+            
+    def possible_selection(self, event):
         if event.widget == self.effect_canv:
+            # User has deselected the widgets
+            
             for key in self.disp_widg.keys():
                 self.disp_widg[key].movement.deselect()
+                
+        else:
+            # User has selected a widget
+            selected = []
+            for key in self.disp_widg.keys():
+                if self.disp_widg[key].movement.selected == True:
+                    selected += [key]
+                    
+            for item in selected:
+                self.selection_ui.set_display(key)
+                    
+                    
 
 # The widget explorer
 class tree_ui:
@@ -182,7 +218,7 @@ class add_ui:
             btns[ii].bind("<Leave>", lambda event, ind = ii:
                           bgs[ind].config(image = bg_unhov))
             
-        self.root.mainloop()
+        #self.root.mainloop()
 
     def __add(self, calling_widget):
         self.widgets.add_widget(calling_widget, "widget_" + str(self.counter), self.widgets.root[1],
@@ -190,9 +226,51 @@ class add_ui:
         
         self.counter += 1
         self.display.refresh()
-        #import sys
-        #print(sys.stdout)
 
+class selection_ui:
+    def __init__(self, widget_manager):
+
+        # Widget manager
+        self.widgets = widget_manager
+
+        # Instantiate the root window
+        self.root = tk.Toplevel()
+
+        # Set default values for the root window
+        self.root.geometry("300x500")   # Size of the window
+        
+        #self.root.iconbitmap()         # Window's icon
+        self.root.title("Selection")    # The title of the window
+
+        # Stop the user being able to resize the window
+        self.root.resizable(False, False)
+
+        self.title = ttk.Label(self.root, text = "Nothing Selected", font = ("Arial Bold", 18))
+        self.title.place(x = 5, y = 5)
+        #self.title.config(text = "Hello")
+
+        self.sub = ttk.Label(self.root, text = "Properties of selected widgets appear here")
+        self.sub.place(x = 6, y = 40)
+
+        lbl_props = ttk.Label(self.root, text = "Properties:", font = ("Arial Bold", 10))
+        lbl_props.place(x = 6, y = 80)
+
+        self.table = ttk.Treeview(self.root, height = 18, columns = ["Property", "Value"], show = "headings")
+        self.table.place(x = 6, y = 105)
+        
+        self.table.heading("Property", text = "Property")
+        self.table.column("Property", width = 143)
+        
+        self.table.heading("Value", text = "Value")
+        self.table.column("Value", width = 143)        
+
+        #self.root.mainloop()
+
+    def set_display(self, identifier):
+        self.title.config(text = self.widgets.widgets[self.widgets.location[identifier]][0])
+        #self.title.config(text = "Hello")
+        #self.title.place(x=3,y=2)
+        
 class menu_ui():
     def __init__(self):
         pass
@@ -211,20 +289,7 @@ class prompt_ui():
 
         self.root.mainloop()
         
-
-"""
-self.root.config(background = "#ffffff")
-
-filemenu = tk.Menu(self.root, tearoff = 0)
-filemenu.add_command(label = "Open File")
-
-menubar = tk.Menu(self.root)
-menubar.add_cascade(label = "File", menu = filemenu)
-#menubar.add_command(label = "E")
-
-self.root.config(menu = menubar)
-
-self.root.mainloop()
-"""
-#x = add_ui(None)
-#x=prompt_ui("Project Name","",None)
+#d = data.data_manager("tk.Tk", "self.root")
+#d.add_widget("ttk.Button", "self.btn", "self.root")
+#x = selection_ui(d)
+#x.set_display()
