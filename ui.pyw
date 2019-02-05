@@ -44,7 +44,8 @@ class display_window:
 
         # Set up deselection
         #self.root.bind("<Button-1>", self.deselect)
-        self.root.bind("<Button-1>", self.possible_selection)
+        self.root.bind("<Button-1>", self.__possible_selection)
+        self.root.bind("<ButtonRelease-1>", self.__coord_upd)
 
         # Canvas where selection boxes etc will appear
         self.effect_canv = tk.Canvas(self.root, width = 500, height = 400)
@@ -74,24 +75,31 @@ class display_window:
             
         #self.root.mainloop()
             
-    def possible_selection(self, event):
+    def __possible_selection(self, event):
         if event.widget == self.effect_canv:
             # User has deselected the widgets
+
+            self.selection_ui.revert()
             
             for key in self.disp_widg.keys():
                 self.disp_widg[key].movement.deselect()
                 
         else:
             # User has selected a widget
-            selected = []
             for key in self.disp_widg.keys():
-                if self.disp_widg[key].movement.selected == True:
-                    selected += [key]
-                    
-            for item in selected:
-                self.selection_ui.set_display(key)
-                    
-                    
+                if event.widget == self.disp_widg[key].movement.inner:
+                    self.selection_ui.set_display(key)
+
+    def __coord_upd(self, event):
+        for ident in self.disp_widg.keys():
+            self.widget_manager.edit_widget(ident, "x", self.disp_widg[ident].x)
+            self.widget_manager.edit_widget(ident, "y", self.disp_widg[ident].y)
+
+        if event.widget != self.effect_canv:
+            for key in self.disp_widg.keys():
+                if self.disp_widg[key].movement.inner == event.widget:
+                    self.selection_ui.set_display(key)
+            
 
 # The widget explorer
 class tree_ui:
@@ -194,6 +202,8 @@ class add_ui:
             bgs += [tk.Label(self.root, image = bg_unhov)]
             btns += [tk.Label(self.root, image = imgs[img])]
 
+            btns[img].image = imgs[img]
+
             # Put them all in the correct places (grid format)
             if (img % 5 == 0) and (img != 0):
                 x = 5
@@ -234,7 +244,7 @@ class selection_ui:
         self.widgets = widget_manager
 
         # Instantiate the root window
-        self.root = tk.Toplevel()
+        self.root = tk.Tk()
 
         # Set default values for the root window
         self.root.geometry("300x500")   # Size of the window
@@ -254,6 +264,8 @@ class selection_ui:
 
         lbl_props = ttk.Label(self.root, text = "Properties:", font = ("Arial Bold", 10))
         lbl_props.place(x = 6, y = 80)
+        
+        self.used_iids = []
 
         self.table = ttk.Treeview(self.root, height = 18, columns = ["Property", "Value"], show = "headings")
         self.table.place(x = 6, y = 105)
@@ -262,14 +274,37 @@ class selection_ui:
         self.table.column("Property", width = 143)
         
         self.table.heading("Value", text = "Value")
-        self.table.column("Value", width = 143)        
+        self.table.column("Value", width = 143)
 
+        self.root.bind("<Return>", self.__clk_property)
         #self.root.mainloop()
 
     def set_display(self, identifier):
         self.title.config(text = self.widgets.widgets[self.widgets.location[identifier]][0])
-        #self.title.config(text = "Hello")
-        #self.title.place(x=3,y=2)
+        self.sub.config(text = self.widgets.widgets[self.widgets.location[identifier]][1])
+        
+        properties = self.widgets.tabulate(identifier)
+        
+        self.table.delete(*self.used_iids)
+        
+        self.used_iids = []
+        
+        for prop in properties.keys():
+            self.table.insert("", "end", iid = prop, values = [prop, properties[prop]])
+            self.used_iids += [prop]
+
+
+    def revert(self):
+        self.title.config(text = "Nothing Selected")
+        self.sub.config(text = "Properties of selected widgets appear here")
+        self.table.delete(*self.used_iids)
+        self.used_iids = []
+
+    def start(self):
+        self.root.mainloop()
+
+    def __clk_property(self, event):
+        self.table.selection_remove(self.table.selection()[:-1])
         
 class menu_ui():
     def __init__(self):
@@ -278,18 +313,28 @@ class menu_ui():
 # UNFINISHED
 #   This will be used to prompt user for text data.
 class prompt_ui():
-    def __init__(self, title, message, entry_width):
-        # Set up basic window
-        self.root = tk.Tk()
-        self.root.geometry("408x329")
-    
-        self.root.title(str(title))
+    def __init__(self, window_type, **kwargs):
+        allowed_types = ["Single"]
+        if window_type in allowed_types:
+            self.root = tk.Toplevel()
+            if window_type == "Single":
+                self.root.geometry("100x100")
+                self.root.title(str(title))
         
-        self.root.resizable(False, False)
+            self.root.resizable(False, False)
 
-        self.root.mainloop()
+            self.root.mainloop()
+        else:
+            raise ValueError("Please specify a valid type of window.")
+        # Set up basic window
+        
+        
+    
+        
         
 #d = data.data_manager("tk.Tk", "self.root")
 #d.add_widget("ttk.Button", "self.btn", "self.root")
 #x = selection_ui(d)
 #x.set_display()
+
+prompt_ui("Single")

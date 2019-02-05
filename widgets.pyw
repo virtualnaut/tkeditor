@@ -4,7 +4,6 @@ import time
 
 class mobiliser:
     def __init__(self, tkWidget, effects, double_clk = False):
-
         
         # The actual tkinter widget
         self.inner = tkWidget
@@ -17,6 +16,7 @@ class mobiliser:
         # Set up bindings
         self.inner.bind("<B1-Motion>", lambda event: self.__drag())
         self.inner.bind("<ButtonPress-1>", self.__grab)
+        self.inner.bind("<ButtonRelease-1>", lambda event: self.__select_effect())
 
         if self.double_clk:
             self.inner.bind("<Double-Button-1>", lambda event: self.enable())
@@ -33,7 +33,10 @@ class mobiliser:
         # Update the display
         self.inner.place(x = new_loc_x, y = new_loc_y)
 
-        self.deselect()
+        #self.deselect()
+        self.effects.delete("all")
+        if self.double_clk:
+            self.inner.state(["disabled"])
 
     def __grab(self, event):
         # Store the location that the widget is grabbed and select the widget

@@ -1,3 +1,5 @@
+import general_tools as gt
+
 class IdentifierUsed(Exception):
     pass
 
@@ -106,6 +108,27 @@ class data_manager:
             return True
         else:
             return value
+
+    def tabulate(self, widget):
+        # All widgets must have:
+        # - x coord
+        # - y coord
+        # - identifier
+        # - parent
+
+        data = self.widgets[self.location[widget]]
+
+        props = {}
+        props["Identifier"] = data[1]
+        props["X-Coord"] = (data[3].replace(" ",""))[2:]
+        props["Y-Coord"] = (data[4].replace(" ",""))[2:]
+        #props["Parent"] = ...
+        
+        props.update(gt.keyword_convert(data[5]))
+
+        return props
+
+        
 """      
 class selection_manager:
     def __init__(self, select_ui):
