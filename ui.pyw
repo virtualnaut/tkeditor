@@ -2,6 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 
 import data_management as data
 import widgets as widg
@@ -243,6 +244,9 @@ class selection_ui:
         # Widget manager
         self.widgets = widget_manager
 
+        # Current Display
+        self.displaying = None
+
         # Instantiate the root window
         self.root = tk.Tk()
 
@@ -276,7 +280,8 @@ class selection_ui:
         self.table.heading("Value", text = "Value")
         self.table.column("Value", width = 143)
 
-        self.root.bind("<Return>", self.__clk_property)
+        self.root.bind("<Return>", lambda event: self.__dbl_clk())
+        self.root.bind("<Double-Button-1>", lambda event: self.__dbl_clk())
         #self.root.mainloop()
 
     def set_display(self, identifier):
@@ -293,35 +298,85 @@ class selection_ui:
             self.table.insert("", "end", iid = prop, values = [prop, properties[prop]])
             self.used_iids += [prop]
 
+        self.displaying = identifier
 
     def revert(self):
         self.title.config(text = "Nothing Selected")
         self.sub.config(text = "Properties of selected widgets appear here")
         self.table.delete(*self.used_iids)
         self.used_iids = []
+        self.displaying = None
 
     def start(self):
         self.root.mainloop()
 
-    def __clk_property(self, event):
-        self.table.selection_remove(self.table.selection()[:-1])
+    def __dbl_clk(self):
+        if len(self.table.selection()) == 1:
+
+            selected = self.table.selection()[0]
+            print(selected)
+
+            # Changing X Coord
+            if selected == "X-Coord":
+                pass
+
+            # Changing Y Coord
+            elif selected == "Y-Coord":
+                pass
+
+            # Changing Identifier
+            elif selected == "Identifer":
+                pass
+
+            # Changing a Property
+            else:
+                prompt_ui(gt.prompt_type(prop))
+            #self.widgets.edit_widget(self.displaying, )
+            prompt_ui("Single", "New Text", "Please enter a string:")
         
 class menu_ui():
     def __init__(self):
         pass
 
-# UNFINISHED
-#   This will be used to prompt user for text data.
+# This will be used to prompt user for text data.
 class prompt_ui():
-    def __init__(self, window_type, **kwargs):
+    def __init__(self, window_type, title, message):
         allowed_types = ["Single"]
-        if window_type in allowed_types:
-            self.root = tk.Toplevel()
-            if window_type == "Single":
-                self.root.geometry("100x100")
-                self.root.title(str(title))
+        self.window_type = window_type
+        self.result = None
         
+        if window_type in allowed_types:
+            # Master window
+            self.root = tk.Toplevel()
             self.root.resizable(False, False)
+
+            # A window for entering a single value e.g. string for text, or a number for coords
+            if window_type == "Single":
+                self.root.geometry("300x90")
+                self.root.title(str(title))
+
+                self.message = ttk.Label(self.root, text = str(message))
+                self.message.place(x = 5, y = 5)
+
+                # Buttons
+                self.input = ttk.Entry(self.root, width = 47)
+                self.input.place(x = 5, y = 30)
+
+                self.accept = ttk.Button(self.root, text = "Accept", command = self.__accept)
+                self.accept.place(x = 220, y = 60)
+
+                self.accept = ttk.Button(self.root, text = "Cancel", command = self.root.destroy)
+                self.accept.place(x = 140, y = 60)
+
+                self.default = ttk.Button(self.root, text = "Default")
+                self.default.place(x = 60, y = 60)
+
+                # Bindings
+                self.root.bind("<Return>", lambda event: self.__accept())
+                self.root.bind("<Escape>", lambda event: self.__cancel())
+
+            elif window_type == "Explorer":
+                return filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*"))))
 
             self.root.mainloop()
         else:
@@ -329,12 +384,21 @@ class prompt_ui():
         # Set up basic window
         
         
-    
-        
-        
+    def __accept(self):
+        if self.window_type == "Single":
+            value = self.input.get()
+            self.root.quit()
+            self.root.destroy()
+            self.result = [True, value]
+
+    def __cancel(self):
+        self.root.quit()
+        self.root.destroy()
+        self.result = [False, None]
+
 #d = data.data_manager("tk.Tk", "self.root")
 #d.add_widget("ttk.Button", "self.btn", "self.root")
 #x = selection_ui(d)
 #x.set_display()
 
-prompt_ui("Single")
+prompt_ui("Single", "New Text", "Please enter a string:")

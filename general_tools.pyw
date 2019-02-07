@@ -149,15 +149,37 @@ def keyword_convert(properties):
             
         if ((val[0] == "\"") and (val[-1] == "\"")) or ((val[0] == "'") and (val[-1] == "'")):
             val = val[1:-1]
-            
+
+        if val == "$NULL$":
+            val = None
         keywords[key] = val
 
     return keywords
 
-#print(keyword_convert(["text = 'Click'", "width = 20"]))
+def prompt_type(prop):
+    valid_props = ["width", "height", "text", "image", "cursor",
+                   "takefocus", "values", "justify"]
+
+    if prop in valid_props:
+        if prop == "width":
+            return "Single"
+        elif prop == "height":
+            return "Single"
+        elif prop == "text":
+            return "Single"
+        elif prop == "image":
+            return "Explorer"
+        elif prop == "cursor":
+            return ["DD", "C"]
+        elif prop == "takefocus":
+            return "Bool"
+        elif prop == "values":
+            return "List"
+        elif prop == "justify":
+            return ["DD", "J"]
+
+    else:
+        raise ValueError("Please specify a valid property.")
 
 
-
-
-
-        
+print(keyword_convert(["width = $NULL$"]))
