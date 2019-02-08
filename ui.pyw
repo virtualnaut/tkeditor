@@ -318,21 +318,25 @@ class selection_ui:
 
             # Changing X Coord
             if selected == "X-Coord":
-                pass
+                prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:")
 
             # Changing Y Coord
             elif selected == "Y-Coord":
-                pass
+                prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:")
 
             # Changing Identifier
             elif selected == "Identifer":
-                pass
+                prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:")
 
             # Changing a Property
             else:
-                prompt_ui(gt.prompt_type(prop))
-            #self.widgets.edit_widget(self.displaying, )
-            prompt_ui("Single", "New Text", "Please enter a string:")
+                prompt_data = gt.prompt_type(selected)
+                prompt = prompt_ui(prompt_data[0], prompt_data[1], prompt_data[2])
+                
+        value = prompt.result
+
+        if value != None:
+            
         
 class menu_ui():
     def __init__(self):
@@ -376,7 +380,7 @@ class prompt_ui():
                 self.root.bind("<Escape>", lambda event: self.__cancel())
 
             elif window_type == "Explorer":
-                return filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*"))))
+                return filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))
 
             self.root.mainloop()
         else:
@@ -401,4 +405,4 @@ class prompt_ui():
 #x = selection_ui(d)
 #x.set_display()
 
-prompt_ui("Single", "New Text", "Please enter a string:")
+#prompt_ui("Single", "New Text", "Please enter a string:")
