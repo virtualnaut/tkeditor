@@ -73,6 +73,12 @@ class data_manager:
         else:
             raise IdentifierUsed("A widget using that identifier already exists.")
 
+    def change_identifier(self, old_identifier, new_identifier):
+        print("OLD = " + old_identifier)
+        print("NEW = " + new_identifier)
+        here = self.location.pop(old_identifier)
+        self.location[new_identifier] = here
+    
     def __data_verif(self, part, value):
         # Verify the data and fix minor errors
         orig = value

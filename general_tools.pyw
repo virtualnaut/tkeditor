@@ -202,6 +202,3 @@ def prompt_type(prop):
 
     else:
         raise ValueError("Please specify a valid property.")
-
-
-print(keyword_convert(["width = $NULL$"]))

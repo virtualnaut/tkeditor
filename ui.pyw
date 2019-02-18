@@ -26,7 +26,7 @@ class base:
 
 # The window where widget arrangement etc. happens
 class display_window:
-    def __init__(self, widget_manager, selection_ui):
+    def __init__(self, widget_manager):
 
         #self.widgets = []
         self.disp_widg = {}
@@ -55,6 +55,7 @@ class display_window:
         #self.root.mainloop()
 
     def refresh(self):
+        print(self.disp_widg.keys())
         # Delete the old widgets and update coords
         for key in self.disp_widg.keys():
             self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
@@ -75,6 +76,13 @@ class display_window:
                                             y = int((widget[4].replace(" ",""))[2:]))
             
         #self.root.mainloop()
+
+    def ui_supply(self, ui):
+        self.selection_ui = ui
+
+    def change_identifier(self, old, new):
+        val = self.disp_widg.pop(old)
+        self.disp_widg[new] = val
             
     def __possible_selection(self, event):
         if event.widget == self.effect_canv:
@@ -247,6 +255,9 @@ class selection_ui:
         # Current Display
         self.displaying = None
 
+        # Needs Refresh?
+        self.req_update = False
+
         # Instantiate the root window
         self.root = tk.Tk()
 
@@ -284,6 +295,9 @@ class selection_ui:
         self.root.bind("<Double-Button-1>", lambda event: self.__dbl_clk())
         #self.root.mainloop()
 
+    def ui_supply(self, ui):
+        self.display_ui = ui
+
     def set_display(self, identifier):
         self.title.config(text = self.widgets.widgets[self.widgets.location[identifier]][0])
         self.sub.config(text = self.widgets.widgets[self.widgets.location[identifier]][1])
@@ -314,7 +328,6 @@ class selection_ui:
         if len(self.table.selection()) == 1:
 
             selected = self.table.selection()[0]
-            print(selected)
 
             # Changing X Coord
             if selected == "X-Coord":
@@ -325,7 +338,7 @@ class selection_ui:
                 prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:")
 
             # Changing Identifier
-            elif selected == "Identifer":
+            elif selected == "Identifier":
                 prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:")
 
             # Changing a Property
@@ -336,9 +349,32 @@ class selection_ui:
         value = prompt.result
 
         if value != None:
-            
+            if value[0] != False:
+                if selected == "Identifier":
+                    # Update subtitle
+                    self.sub.config(text = str(value[1]))
+
+                    # Update data
+                    self.widgets.change_identifier(self.displaying, value[1])
+                    self.display_ui.change_identifier(self.displaying, value[1])
+                    self.displaying = value[1]
+                    
+                elif selected == "X-Coord":
+                    pass
+
+                elif selected == "Y-Coord":
+                    pass
+
+                else:
+                    self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
         
-class menu_ui():
+
+        # Fully refresh the display
+        self.set_display(self.displaying)
+        
+        self.display_ui.refresh()
+        
+class menu_ui:
     def __init__(self):
         pass
 
