@@ -9,21 +9,6 @@ import widgets as widg
 import general_tools as gt
 import defaults
 
-class base:
-    def __init__(self):
-        # Instantiate the root window
-        self.root = tk.Tk()
-    
-        # Set default values for the root window
-        self.root.geometry("500x400")   # Size of the window
-    
-        #self.root.iconbitmap()         # Window's icon
-        self.root.title("Ufasfd")     # The title of the window
-        
-    def begin(self):
-        self.root.mainloop()
-        
-
 # The window where widget arrangement etc. happens
 class display_window:
     def __init__(self, widget_manager):
@@ -44,7 +29,6 @@ class display_window:
         self.root.title("Untitled")     # The title of the window
 
         # Set up deselection
-        #self.root.bind("<Button-1>", self.deselect)
         self.root.bind("<Button-1>", self.__possible_selection)
         self.root.bind("<ButtonRelease-1>", self.__coord_upd)
 
@@ -55,7 +39,7 @@ class display_window:
         #self.root.mainloop()
 
     def refresh(self):
-        print(self.disp_widg.keys())
+        
         # Delete the old widgets and update coords
         for key in self.disp_widg.keys():
             self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
@@ -75,7 +59,8 @@ class display_window:
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
             
-        #self.root.mainloop()
+        # Redraw the root window
+        self.root.geometry(str(self.widget_manager.root[2]) + "x" + str(self.widget_manager.root[3]))
 
     def ui_supply(self, ui):
         self.selection_ui = ui
@@ -87,11 +72,11 @@ class display_window:
     def __possible_selection(self, event):
         if event.widget == self.effect_canv:
             # User has deselected the widgets
-
-            self.selection_ui.revert()
             
             for key in self.disp_widg.keys():
                 self.disp_widg[key].movement.deselect()
+
+            self.selection_ui.root_select()
                 
         else:
             # User has selected a widget
@@ -107,8 +92,7 @@ class display_window:
         if event.widget != self.effect_canv:
             for key in self.disp_widg.keys():
                 if self.disp_widg[key].movement.inner == event.widget:
-                    self.selection_ui.set_display(key)
-            
+                    self.selection_ui.set_display(key) 
 
 # The widget explorer
 class tree_ui:
@@ -126,7 +110,7 @@ class tree_ui:
         # Stop the user being able to resize the window
         self.root.resizable(False, False)
 
-    def __update():
+    def __update(self):
         pass
 
 # The widget adder
@@ -223,8 +207,7 @@ class add_ui:
 
             bgs[img].place(x = x, y = y)
             btns[img].place(x = x+4, y = y+4)
-            
-            
+
         # Bind each button to the __add function, so that they add a widget to
         #   the display window when clicked.
         # Also set up button hovering
@@ -254,6 +237,7 @@ class selection_ui:
 
         # Current Display
         self.displaying = None
+        self.root = False
 
         # Needs Refresh?
         self.req_update = False
@@ -303,6 +287,7 @@ class selection_ui:
         self.sub.config(text = self.widgets.widgets[self.widgets.location[identifier]][1])
         
         properties = self.widgets.tabulate(identifier)
+        print(properties.keys())
         
         self.table.delete(*self.used_iids)
         
@@ -320,6 +305,22 @@ class selection_ui:
         self.table.delete(*self.used_iids)
         self.used_iids = []
         self.displaying = None
+
+    def root_select(self):
+        self.title.config(text = self.widgets.root[0])
+        self.sub.config(text = self.widgets.root[1])
+
+        properties = self.widgets.root_tabulate()
+        
+        self.table.delete(*self.used_iids)
+        
+        self.used_iids = []
+
+        for prop in properties.keys():
+            self.table.insert("", "end", iid = prop, values = [prop, properties[prop]])
+            self.used_iids += [prop]
+
+        self.displaying = "$ROOT$"
 
     def start(self):
         self.root.mainloop()
@@ -367,10 +368,10 @@ class selection_ui:
 
                 else:
                     self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
-        
 
         # Fully refresh the display
-        self.set_display(self.displaying)
+        if self.displaying == "$ROOT$":
+            self.root_select()
         
         self.display_ui.refresh()
         
@@ -435,10 +436,3 @@ class prompt_ui():
         self.root.quit()
         self.root.destroy()
         self.result = [False, None]
-
-#d = data.data_manager("tk.Tk", "self.root")
-#d.add_widget("ttk.Button", "self.btn", "self.root")
-#x = selection_ui(d)
-#x.set_display()
-
-#prompt_ui("Single", "New Text", "Please enter a string:")
