@@ -203,16 +203,30 @@ def prompt_type(prop):
     else:
         raise ValueError("Please specify a valid property.")
 
+def property_strip(prop):
+    print("2"+prop)
+    for char in range(len(prop)):
+        if prop[char] == "=":
+            return [prop[:char]]
+
 def property_find(properties, find):
+    # Returns the index in 'properties' for the specified property.
+    
     nospace = []
     for prop in properties:
         nospace += [prop.replace(" ","")]
-        
+
     stripped = []
     for prop in nospace:
-        for char in range(len(prop)):
-            if prop[char] == "=":
-                stripped += [prop[:char]]
-    print(stripped)
+        stripped += property_strip(prop)
 
-property_find(['width = $NULL$', 'text = "Button"'], "text")
+    print(stripped)
+                
+    for prop in range(len(stripped)):
+        print(stripped[prop],property_strip(find))
+        if stripped[prop] == property_strip(find):
+            return prop
+        else:
+            return False
+
+print(property_find(['width = $NULL$', 'text = "Button"'], "text = "))

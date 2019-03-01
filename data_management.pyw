@@ -43,7 +43,7 @@ class data_manager:
         if (part == "x" or part == "y"):
             value = part+"="+str(value)
 
-        if part != "identifier" and part != "properties":
+        if (part != "identifier") and (part != "properties"):
             try:
                 accepted = self.__data_verif(part, value)
 
@@ -60,7 +60,12 @@ class data_manager:
                 self.location[value] = self.location.pop(widget_identifier)
 
             else:
-                
+                # If a property is being changed, change only the property that is supplied,
+                #   and keep all the others.
+                print("!  "+str(self.widgets[self.location[widget_identifier]][5]))
+                index = gt.property_find(self.widgets[self.location[widget_identifier]][5], value)
+                self.widgets[self.location[widget_identifier]][5][index] = value
+                print("!! "+str(self.widgets[self.location[widget_identifier]][5]))
 
     def add_widget(self, widget_class, widget_identifier, parent,
                    x = 5, y = 5, properties = [], methods = [],
