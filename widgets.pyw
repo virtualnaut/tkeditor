@@ -60,10 +60,11 @@ class mobiliser:
             self.inner.state(["disabled"])
 
     def __select_effect(self):
+        #print(self.inner.winfo_x()-4, self.inner.winfo_y()-4)
         self.effects.delete("all")
-        self.effects.create_rectangle(self.inner.winfo_x()-4, self.inner.winfo_y()-4,
-                                     (self.inner.winfo_x() + self.inner.winfo_reqwidth()+4),
-                                     (self.inner.winfo_y() + self.inner.winfo_reqheight())+4,
+        self.effects.create_rectangle(self.inner.x-4, self.inner.y-4,
+                                     (self.inner.x + self.inner.winfo_reqwidth()+4),
+                                     (self.inner.y + self.inner.winfo_reqheight())+4,
                                      dash = (3,3), outline = "#00a3ff") 
         
     def enable(self):

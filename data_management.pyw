@@ -44,15 +44,13 @@ class data_manager:
             value = part+"="+str(value)
 
         if (part != "identifier") and (part != "properties"):
-            try:
-                accepted = self.__data_verif(part, value)
+            accepted = self.__data_verif(part, value)
 
-                if not accepted:
-                    self.widgets[self.location[widget_identifier]][strs[part]] = accepted
-                else:
-                    self.widgets[self.location[widget_identifier]][strs[part]] = value
-            except:
-                raise PropertyError("That property doesn't exist.")
+            if not accepted:
+                self.widgets[self.location[widget_identifier]][strs[part]] = accepted
+            else:
+                self.widgets[self.location[widget_identifier]][strs[part]] = value
+
 
         else:
             if part == "identifier":
@@ -62,10 +60,11 @@ class data_manager:
             else:
                 # If a property is being changed, change only the property that is supplied,
                 #   and keep all the others.
-                print("!  "+str(self.widgets[self.location[widget_identifier]][5]))
+                value = value[0]
+
                 index = gt.property_find(self.widgets[self.location[widget_identifier]][5], value)
                 self.widgets[self.location[widget_identifier]][5][index] = value
-                print("!! "+str(self.widgets[self.location[widget_identifier]][5]))
+
 
     def add_widget(self, widget_class, widget_identifier, parent,
                    x = 5, y = 5, properties = [], methods = [],
@@ -104,6 +103,7 @@ class data_manager:
             pass
 
         elif part == "x":
+            print(value+"?")
             if str(value)[:2] != "x=":
                 value = "x=" + str(value)
             try:
@@ -147,8 +147,6 @@ class data_manager:
             props["Y-Coord"] = data[4]
             
         #props["Parent"] = ...
-            
-        print(data[5])
         props.update(gt.keyword_convert(data[5]))
 
         return props

@@ -204,11 +204,10 @@ def prompt_type(prop):
         raise ValueError("Please specify a valid property.")
 
 def property_strip(prop):
-    print("2"+prop)
     for char in range(len(prop)):
         if prop[char] == "=":
-            return [prop[:char]]
-
+            return prop[:char]
+"""
 def property_find(properties, find):
     # Returns the index in 'properties' for the specified property.
     
@@ -228,5 +227,23 @@ def property_find(properties, find):
             return prop
         else:
             return False
+"""
+def property_find(properties, find):
+    # Remove spaces from everything
+    find = find.replace(" ","")
+    
+    nospace = []
+    for prop in properties:
+        nospace += [prop.replace(" ","")]
 
-print(property_find(['width = $NULL$', 'text = "Button"'], "text = "))
+    # Strip data away from all args
+    find = property_strip(find)
+
+    stripped = []
+    for prop in nospace:
+        stripped += [property_strip(prop)]
+        
+    # Get the index
+    return locate(stripped, find)
+
+#print(property_find(['width = $NULL$', 'text = "Button"'], "text='Hello'"))

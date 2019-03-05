@@ -2,7 +2,7 @@
 
 import tkinter as tk
 from tkinter import ttk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 import data_management as data
 import widgets as widg
@@ -24,6 +24,7 @@ class display_window:
 
         # Set default values for the root window
         self.root.geometry("500x400")   # Size of the window
+        self.root.resizable(False, False)
         
         #self.root.iconbitmap()         # Window's icon
         self.root.title("Untitled")     # The title of the window
@@ -60,7 +61,10 @@ class display_window:
                                             y = int((widget[4].replace(" ",""))[2:]))
             
         # Redraw the root window
-        self.root.geometry(str(self.widget_manager.root[2]) + "x" + str(self.widget_manager.root[3]))
+        new_width = self.widget_manager.root[2]
+        new_height = self.widget_manager.root[3]
+             
+        self.root.geometry(str(new_width) + "x" + str(new_height))
 
     def ui_supply(self, ui):
         self.selection_ui = ui
@@ -92,7 +96,11 @@ class display_window:
         if event.widget != self.effect_canv:
             for key in self.disp_widg.keys():
                 if self.disp_widg[key].movement.inner == event.widget:
-                    self.selection_ui.set_display(key) 
+                    self.selection_ui.set_display(key)
+                    
+    def selection_box_fix(self, identifier):
+        self.disp_widg[identifier].movement.deselect()
+        self.disp_widg[identifier].movement.select()
 
 # The widget explorer
 class tree_ui:
@@ -327,52 +335,105 @@ class selection_ui:
 
     def __dbl_clk(self):
         if len(self.table.selection()) == 1:
+            if self.displaying != "$ROOT$":
+                selected = self.table.selection()[0]
 
-            selected = self.table.selection()[0]
+                # Changing X Coord
+                if selected == "X-Coord":
+                    prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:")
 
-            # Changing X Coord
-            if selected == "X-Coord":
-                prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:")
+                # Changing Y Coord
+                elif selected == "Y-Coord":
+                    prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:")
 
-            # Changing Y Coord
-            elif selected == "Y-Coord":
-                prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:")
+                # Changing Identifier
+                elif selected == "Identifier":
+                    prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:")
 
-            # Changing Identifier
-            elif selected == "Identifier":
-                prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:")
-
-            # Changing a Property
+                # Changing a Property
+                else:
+                    prompt_data = gt.prompt_type(selected)
+                    prompt = prompt_ui(*prompt_data)
+                    
             else:
-                prompt_data = gt.prompt_type(selected)
-                prompt = prompt_ui(prompt_data[0], prompt_data[1], prompt_data[2])
+                selected = self.table.selection()[0]
+                if selected == "Width":
+                    prompt = prompt_ui("Single", "Width", "Please enter a width:")
+                elif selected == "Height":
+                    prompt = prompt_ui("Single", "Height", "Please enter a height:")
                 
         value = prompt.result
 
         if value != None:
             if value[0] != False:
-                if selected == "Identifier":
-                    # Update subtitle
-                    self.sub.config(text = str(value[1]))
+                if self.displaying != "$ROOT$":
+                    if selected == "Identifier":
+                        # Update subtitle
+                        self.sub.config(text = str(value[1]))
 
-                    # Update data
-                    self.widgets.change_identifier(self.displaying, value[1])
-                    self.display_ui.change_identifier(self.displaying, value[1])
-                    self.displaying = value[1]
-                    
-                elif selected == "X-Coord":
-                    pass
+                        # Update data
+                        self.widgets.change_identifier(self.displaying, value[1])
+                        self.display_ui.change_identifier(self.displaying, value[1])
+                        self.displaying = value[1]
+                        
+                    elif selected == "X-Coord":
+                        print(value[1])
+                        self.widgets.edit_widget(self.displaying, "x", value[1])
+                        self.display_ui.disp_widg[self.displaying].x = int(value[1])
 
-                elif selected == "Y-Coord":
-                    pass
+                    elif selected == "Y-Coord":
+                        print(value[1])
+                        self.widgets.edit_widget(self.displaying, "y", value[1])
+                        self.display_ui.disp_widg[self.displaying].y = int(value[1])
 
+                    else:
+                        self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
                 else:
-                    self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
-
+                    warnings = 0
+                    new_width = value[1]
+                    new_height = value[1]
+                    
+                    if selected == "Width":
+                    
+                        # Is resizing the window going to cause a widget to diappear?
+                        for key in self.display_ui.disp_widg.keys():
+                            print(self.display_ui.disp_widg[key].x, new_width)
+                            if self.display_ui.disp_widg[key].x > int(new_width):
+                                warnings += 1
+                                
+                        if warnings > 1:
+                            contin = messagebox.askyesno("Move Widgets?", str(warnings) + " widgets will be moved to keep them in the window.\nAre you sure to want to resize?")
+                        elif warnings == 1:
+                            contin = messagebox.askyesno("Move Widget?", "A widget will be moved to keep them in the window.\nAre you sure to want to resize?")
+                        else:
+                            contin = True
+                            
+                        if contin:
+                            self.widgets.edit_root("width", value[1])
+                        
+                    elif selected == "Height":
+                    
+                        # Is resizing the window going to cause a widget to diappear?
+                        for key in self.display_ui.disp_widg.keys():
+                            if self.display_ui.disp_widg[key].y > int(new_height):
+                                warnings += 1
+                                
+                        if warnings > 1:
+                            contin = messagebox.askyesno("Move Widgets?", str(warnings) + " widgets will be moved to keep them in the window.\nAre you sure to want to resize?")
+                        elif warnings == 1:
+                            contin = messagebox.askyesno("Move Widget?", "A widget will be moved to keep them in the window.\nAre you sure to want to resize?")
+                        else:
+                            print("NONE")
+                        if contin:         
+                            self.widgets.edit_root("height", value[1])
+                    
         # Fully refresh the display
         if self.displaying == "$ROOT$":
             self.root_select()
-        
+        else:
+            self.set_display(self.displaying)
+            self.display_ui.selection_box_fix(self.displaying)
+            
         self.display_ui.refresh()
         
 class menu_ui:
