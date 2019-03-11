@@ -207,27 +207,7 @@ def property_strip(prop):
     for char in range(len(prop)):
         if prop[char] == "=":
             return prop[:char]
-"""
-def property_find(properties, find):
-    # Returns the index in 'properties' for the specified property.
-    
-    nospace = []
-    for prop in properties:
-        nospace += [prop.replace(" ","")]
 
-    stripped = []
-    for prop in nospace:
-        stripped += property_strip(prop)
-
-    print(stripped)
-                
-    for prop in range(len(stripped)):
-        print(stripped[prop],property_strip(find))
-        if stripped[prop] == property_strip(find):
-            return prop
-        else:
-            return False
-"""
 def property_find(properties, find):
     # Remove spaces from everything
     find = find.replace(" ","")
@@ -245,5 +225,20 @@ def property_find(properties, find):
         
     # Get the index
     return locate(stripped, find)
-
-#print(property_find(['width = $NULL$', 'text = "Button"'], "text='Hello'"))
+    
+def coord_validate(x, y, window_width, window_height):
+    # This function determines whether a widget will be moved off the window and proposes a new location.
+    # Allow minimum of 5 by 5px of the widget to be onscreen.
+    
+    new = [x, y]
+    
+    err = False
+    if x > window_width - 5:
+        err = True
+        new[0] = window_width - 10
+        
+    if y > window_height - 5:
+        err = True
+        new[1] = window_height - 10
+        
+    return [err, new]

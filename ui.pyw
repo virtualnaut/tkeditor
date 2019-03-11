@@ -394,8 +394,46 @@ class selection_ui:
                     new_height = value[1]
                     
                     if selected == "Width":
+                        window_width = value[1]
+                        window_height = self.widgets.root[3]
+                    else:
+                        window_height = value[1]
+                        window_width = self.widgets.root[2]
+
+                    warning = False
+                    correctees = []
+                    correct_coords = []
+                    for key in self.display_ui.disp_widg.keys():
+                        check_results = gt.coord_validate(self.display.disp_widg[key].x, self.display.disp_widg[key].y, window_width, window_height)
+                        
+                        if check_results[0] == True:
+                            warning = True
+                            
+                        correctees += [key]
+                        correct_coords += [check_results[1]]
+                        
+                    wants_correction = messagebox.askyesno("Move Widgets?", "One or more widgets will be moved to keep them in the window\nAre you sure you want to continue?")
                     
-                        # Is resizing the window going to cause a widget to diappear?
+                    if wants_correction:
+                        for key in self.display_ui.disp_widg.keys():
+                            # CHANGE COORDS AND CHANGE WIN WIDTH...
+                    
+                    
+                    """
+                    if selected == "Width":
+                        
+                        
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                        
+                        # Is resizing the window going to cause a widget to disappear?
                         for key in self.display_ui.disp_widg.keys():
                             print(self.display_ui.disp_widg[key].x, new_width)
                             if self.display_ui.disp_widg[key].x > int(new_width):
@@ -410,6 +448,7 @@ class selection_ui:
                             
                         if contin:
                             self.widgets.edit_root("width", value[1])
+                        
                         
                     elif selected == "Height":
                     
@@ -426,6 +465,7 @@ class selection_ui:
                             print("NONE")
                         if contin:         
                             self.widgets.edit_root("height", value[1])
+                    """
                     
         # Fully refresh the display
         if self.displaying == "$ROOT$":
