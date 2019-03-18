@@ -394,17 +394,17 @@ class selection_ui:
                     new_height = value[1]
                     
                     if selected == "Width":
-                        window_width = value[1]
-                        window_height = self.widgets.root[3]
+                        window_width = int(value[1])
+                        window_height = int(self.widgets.root[3])
                     else:
-                        window_height = value[1]
-                        window_width = self.widgets.root[2]
+                        window_height = int(value[1])
+                        window_width = int(self.widgets.root[2])
 
                     warning = False
                     correctees = []
                     correct_coords = []
                     for key in self.display_ui.disp_widg.keys():
-                        check_results = gt.coord_validate(self.display.disp_widg[key].x, self.display.disp_widg[key].y, window_width, window_height)
+                        check_results = gt.coord_validate(self.display_ui.disp_widg[key].x, self.display_ui.disp_widg[key].y, window_width, window_height)
                         
                         if check_results[0] == True:
                             warning = True
@@ -412,60 +412,23 @@ class selection_ui:
                         correctees += [key]
                         correct_coords += [check_results[1]]
                         
-                    wants_correction = messagebox.askyesno("Move Widgets?", "One or more widgets will be moved to keep them in the window\nAre you sure you want to continue?")
+                    if warning:
+                        wants_correction = messagebox.askyesno("Move Widgets?", "One or more widgets will be moved to keep them in the window\nAre you sure you want to continue?")
                     
-                    if wants_correction:
-                        for key in self.display_ui.disp_widg.keys():
-                            # CHANGE COORDS AND CHANGE WIN WIDTH...
-                    
-                    
-                    """
-                    if selected == "Width":
-                        
-                        
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                    
-                        
-                        # Is resizing the window going to cause a widget to disappear?
-                        for key in self.display_ui.disp_widg.keys():
-                            print(self.display_ui.disp_widg[key].x, new_width)
-                            if self.display_ui.disp_widg[key].x > int(new_width):
-                                warnings += 1
+                        if wants_correction:
+                            for widget in range(len(correctees)):
+                                print(correct_coords[widget][0])
+                                self.widgets.edit_widget(correctees[widget], "x", correct_coords[widget][0])
+                                self.display_ui.disp_widg[correctees[widget]].x = correct_coords[widget][0]
                                 
-                        if warnings > 1:
-                            contin = messagebox.askyesno("Move Widgets?", str(warnings) + " widgets will be moved to keep them in the window.\nAre you sure to want to resize?")
-                        elif warnings == 1:
-                            contin = messagebox.askyesno("Move Widget?", "A widget will be moved to keep them in the window.\nAre you sure to want to resize?")
-                        else:
-                            contin = True
-                            
-                        if contin:
-                            self.widgets.edit_root("width", value[1])
-                        
-                        
-                    elif selected == "Height":
-                    
-                        # Is resizing the window going to cause a widget to diappear?
-                        for key in self.display_ui.disp_widg.keys():
-                            if self.display_ui.disp_widg[key].y > int(new_height):
-                                warnings += 1
+                                self.widgets.edit_widget(correctees[widget], "y", correct_coords[widget][1])
+                                self.display_ui.disp_widg[correctees[widget]].y = correct_coords[widget][1]
                                 
-                        if warnings > 1:
-                            contin = messagebox.askyesno("Move Widgets?", str(warnings) + " widgets will be moved to keep them in the window.\nAre you sure to want to resize?")
-                        elif warnings == 1:
-                            contin = messagebox.askyesno("Move Widget?", "A widget will be moved to keep them in the window.\nAre you sure to want to resize?")
-                        else:
-                            print("NONE")
-                        if contin:         
-                            self.widgets.edit_root("height", value[1])
-                    """
+                                self.widgets.edit_root("width", window_width)
+                                self.widgets.edit_root("height", window_height)
+                    else:
+                        self.widgets.edit_root("width", window_width)
+                        self.widgets.edit_root("height", window_height)
                     
         # Fully refresh the display
         if self.displaying == "$ROOT$":
@@ -473,12 +436,38 @@ class selection_ui:
         else:
             self.set_display(self.displaying)
             self.display_ui.selection_box_fix(self.displaying)
-            
+         
+        print("REFRESHING")
         self.display_ui.refresh()
         
 class menu_ui:
     def __init__(self):
-        pass
+        # Set Up Window
+        self.root = tk.Toplevel()
+        self.root.geometry("300x100")
+        self.root.title("Menu")
+        
+        # Buttons
+        
+        imgs = [tk.PhotoImage(file="./resources/widget.png"),
+                tk.PhotoImage(file="./resources/widget.png"),
+                tk.PhotoImage(file="./resources/widget.png")]
+                
+        bg_unhov = tk.PhotoImage(file = "./resources/bg_unhov.png")
+        bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
+        
+        # New UI
+        bg_new = ttk.Label(self.root, image = bg_unhov)
+        btn_new = ttk.Label(self.root, image = imgs[0])
+        
+        bg_new.place(x=10,y=10)
+        btn_new.place(x=14,y=14)
+        
+        btn_new.bind("<Enter>", lambda event: bg_new.config(image = bg_hov))
+        btn_new.bind("<Leave>", lambda event: bg_new.config(image = bg_unhov))
+
+        
+        #self.root.mainloop()
 
 # This will be used to prompt user for text data.
 class prompt_ui():
