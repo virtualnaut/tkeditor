@@ -242,3 +242,56 @@ def coord_validate(x, y, window_width, window_height):
         new[1] = window_height - 10
         
     return [err, new]
+    
+def noneify(root, widgets):
+    print()
+    print(root)
+    print(widgets)
+    print()
+    
+    root = list(root)
+    widget = list(widgets)
+    
+    for ii in range(len(root)):
+        if root[ii] == "$NULL$":
+           root[ii] = None
+    """       
+    for widget in range(len(widgets)):
+    
+        for property in range(len(widgets[widget])):
+            #print("!"+str(property))
+            if type(widgets[widget][property]) == list:
+                for sub in range(len(widgets[widget][property])):
+                    required = []
+                    print(widget,property,sub)
+                    
+                    if "$NULL$" not in widgets[widget][property][sub]:
+                        required += [widgets[widget][property][sub]]
+                        
+                    print(required)
+                    widgets[widget][property] = list(required)
+    """
+    
+    amended = []
+    
+    for widget in widgets:
+        for property in widget:
+            if type(property) == list:
+                for sub in property:
+                
+                    required = []
+                    
+                    if "$NULL$" not in sub:
+                        required += [sub]
+
+                    amended += [required]
+                    
+    for widget in range(len(widgets)):
+        widgets[widget][5] = amended[widget]
+                
+               
+        
+                
+    return [root, widgets]
+
+print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))

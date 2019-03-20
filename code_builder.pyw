@@ -71,19 +71,19 @@ def root_translate(data):
     # --Translate the methods--
     methods = ""
 
-    for method in data[2]:
+    for method in data[4]:
         methods += identifier + "." + method + "\n"
 
     # --Translate the bindings--
     bindings = ""
 
-    for binding in data[3]:
+    for binding in data[5]:
         bindings += identifier + ".bind(" + binding + ")\n"
 
     # --Translate the protocols--
     protocols = ""
 
-    for protocol in data[4]:
+    for protocol in data[6]:
         protocols += identifier + ".protocol(" + protocol + ")\n"
 
     translated = instantiation + methods + bindings + protocols + "\n"
@@ -122,7 +122,7 @@ def generate_class(class_ident, root_data, widg_data):
     return class_text
 
 #print(generate_class("tester",["tk.Tk", "root", [], ["<Button-1>, dummyI"], ["\"WM_DELETE_WINDOW\", dummyII"]], ))
-
+"""
 print(generate_class("CLASS",
                ["tk.Tk", "root", ["geometry('500x500')", "title('Test Window')"], 
                                  [],
@@ -130,8 +130,9 @@ print(generate_class("CLASS",
                [["ttk.Button", "btn_a", "root", "x = 50", "y = 50", ["text = 'Click Me'"],
                                                                    [],
                                                                    []]]))
-"""
+
 print(gt.indent(widget_translate([["ttk.Button", "btn_a", "root", "x = 50", "y = 50", ["text = 'Click Me'"],
                                                                    [],
                                                                    []]]))[0])
+
 """

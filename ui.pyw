@@ -8,6 +8,7 @@ import data_management as data
 import widgets as widg
 import general_tools as gt
 import defaults
+import code_builder as cb
 
 # The window where widget arrangement etc. happens
 class display_window:
@@ -441,10 +442,14 @@ class selection_ui:
         self.display_ui.refresh()
         
 class menu_ui:
-    def __init__(self):
+    def __init__(self, widget_manager):
+        
+        # Widget Manager, for export data
+        self.widget_manager = widget_manager
+        
         # Set Up Window
         self.root = tk.Toplevel()
-        self.root.geometry("300x100")
+        self.root.geometry("285x100")
         self.root.title("Menu")
         
         # Buttons
@@ -457,17 +462,69 @@ class menu_ui:
         bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
         
         # New UI
-        bg_new = ttk.Label(self.root, image = bg_unhov)
-        btn_new = ttk.Label(self.root, image = imgs[0])
+        bg_new = ttk.Label(self.root)
+        btn_new = ttk.Label(self.root)
+        
+        bg_new.image = bg_unhov
+        btn_new.image = imgs[0]
+        
+        bg_new.config(image = bg_unhov)
         
         bg_new.place(x=10,y=10)
         btn_new.place(x=14,y=14)
         
         btn_new.bind("<Enter>", lambda event: bg_new.config(image = bg_hov))
         btn_new.bind("<Leave>", lambda event: bg_new.config(image = bg_unhov))
-
         
-        #self.root.mainloop()
+        btn_new.config(image = imgs[0])
+
+        # Export UI
+        bg_exp = ttk.Label(self.root)
+        btn_exp = ttk.Label(self.root)
+        
+        bg_exp.image = bg_unhov
+        btn_exp.image = imgs[1]
+        
+        bg_exp.config(image = bg_unhov)
+        
+        bg_exp.place(x=100,y=10)
+        btn_exp.place(x=104,y=14)
+        
+        btn_exp.bind("<Enter>", lambda event: bg_exp.config(image = bg_hov))
+        btn_exp.bind("<Leave>", lambda event: bg_exp.config(image = bg_unhov))
+        btn_exp.bind("<Button-1>", lambda event: self.__export())
+        
+        btn_exp.config(image = imgs[1])
+        
+        # Save UI
+        bg_sav = ttk.Label(self.root)
+        btn_sav = ttk.Label(self.root)
+        
+        bg_sav.image = bg_unhov
+        btn_sav.image = imgs[2]
+        
+        bg_sav.config(image = bg_unhov)
+        
+        bg_sav.place(x=190,y=10)
+        btn_sav.place(x=194,y=14)
+        
+        btn_sav.bind("<Enter>", lambda event: bg_sav.config(image = bg_hov))
+        btn_sav.bind("<Leave>", lambda event: bg_sav.config(image = bg_unhov))
+        
+        btn_sav.config(image = imgs[2])
+        
+    def __save(self):
+        pass
+        
+    def __export(self):
+        prepped = gt.noneify(self.widget_manager.root, self.widget_manager.widgets)
+        TEMPPATH = "./output/proto.py"
+        py_stream = open(TEMPPATH, "w+")
+        py_stream.write(cb.generate_class("ui", prepped[0], prepped[1]))
+        py_stream.close()
+        
+    def __new(self):
+        pass
 
 # This will be used to prompt user for text data.
 class prompt_ui():

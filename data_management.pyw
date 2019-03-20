@@ -1,4 +1,5 @@
 import general_tools as gt
+import code_builder as cb
 
 class IdentifierUsed(Exception):
     pass
@@ -162,3 +163,11 @@ class data_manager:
         props.update(gt.keyword_convert(data[4]))
 
         return props
+"""        
+def generate(root, widgets):
+    # This function is called by the export method in ui.menu_ui
+    # It returns the python code that generates the UI as a string.
+    
+    all_data = [root, widgets]
+    return cb.generate_class(all_data)
+"""
