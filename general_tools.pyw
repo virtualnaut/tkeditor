@@ -128,3 +128,37 @@ def unlistify(text):
         string_text += element
 
     return(string_text)
+
+def locate(haystack, needle):
+    # Find first occurence of 'needle' in 'haystack'
+    for check in range(len(haystack)):
+        if haystack[check] == needle:
+            return check
+        elif check == len(haystack)-1:
+            return None
+
+def keyword_convert(properties):
+    keywords = {}
+    for prop in properties:
+        key = prop[:locate(prop, "=")]
+        key = key.replace(" ","")
+        print(key)
+
+        val = prop[locate(prop, "=")+1:]
+        if val[0] == " ":
+            val = val[1:]
+            
+        if ((val[0] == "\"") and (val[-1] == "\"")) or ((val[0] == "'") and (val[-1] == "'")):
+            val = val[1:-1]
+            
+        keywords[key] = val
+
+    return keywords
+
+#print(keyword_convert(["text = 'Click'", "width = 20"]))
+
+
+
+
+
+        

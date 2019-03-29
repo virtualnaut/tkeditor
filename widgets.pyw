@@ -35,12 +35,12 @@ class mobiliser:
         self.grab[1] = event.y
     
     def select(self):
-        self.inner.config(style = self.inner.selected_style_name)
+        #self.inner.config(style = self.inner.selected_style_name)
         self.selected = True
         
     def deselect(self, event):
         if event.widget != self.inner:
-            self.inner.config(style = self.inner.style_name)
+            #self.inner.config(style = self.inner.style_name)
             self.selected = False
             if self.double_clk:
                 self.inner.state(["disabled"])
@@ -55,12 +55,14 @@ class mButton(ttk.Button):
         self.prop_dict = kwargs
         self.x = 0
         self.y = 0
-        
+
+        """
         # Styling
         self.__select_style = ttk.Style()
         self.__select_style.configure("Selected.TButton", background = "orange")
         self.style_name = "TButton"
         self.selected_style_name = "Selected.TButton"
+        """
         
         # Raise an error if an invalid keyword is given
         self.__kwarg_validate(kwargs)
@@ -168,6 +170,10 @@ class mCombobox(ttk.Combobox):
         self.y = y
         super().place(x = x, y = y)
 
+def movable(widget_type, parent, **kwargs):
+    if widget_type == "ttk.Button":
+        return mButton(parent, **kwargs)
+
 def debug():
     r=tk.Tk()
     a={"text":"Hello"}
@@ -182,4 +188,4 @@ def debug():
     c.place(x=10,y=10)
     r.mainloop()
 
-debug()
+#debug()

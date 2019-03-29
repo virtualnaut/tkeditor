@@ -5,5 +5,5 @@ import threading
 
 widget_manager = data.data_manager("tk", "root")
 
-x=ui.display_window()
-y=ui.add_ui(widget_manager)
+disp = ui.display_window(widget_manager)
+add = ui.add_ui(widget_manager, disp)

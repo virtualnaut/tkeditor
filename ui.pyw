@@ -4,12 +4,15 @@ import tkinter as tk
 from tkinter import ttk
 
 import data_management as data
+import widgets as widg
+import general_tools as gt
 
 # The window where widget arrangement etc. happens
 class display_window:
     def __init__(self, widget_manager):
 
-        self.widgets = []
+        #self.widgets = []
+        self.disp_widg = {}
         self.widget_manager = widget_manager
 
         # Instantiate the root window
@@ -21,21 +24,23 @@ class display_window:
         #self.root.iconbitmap()         # Window's icon
         self.root.title("Untitled")     # The title of the window
 
-    def refresh():
-        self.widgets = []
+        # Canvas where dotted selection boxes etc will appear
+        self.canv = tk.Canvas(self.root, width = 500, height = 400)
+        self.canv.place(x = 0, y = 0)
+
+    def refresh(self):
+        #self.widgets = []
+
+        # Delete the old widgets
+        for key in self.disp_widg.keys():
+            self.disp_widg[key].destroy()
+
+        self.disp_widg = {}
 
         for widget in self.widget_manager.widgets:
-            # FOR EACH WIDGET:
-            # add list to self.widgets containing the MOVABLE WIDGET
-            # TASKS
-            # instantiate w/ parent
-            # .place(x = x, y = y)
-            # .config( ... )
 
-            # REMEMBER MOVABLE WIDGETS!!
-            # FIND AND COPY FILE
-
-        
+            self.disp_widg[widget[1]] = widg.movable(widget[0], self.root, **gt.keyword_convert(widget[5]))
+            self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]), y = int((widget[4].replace(" ",""))[2:]))
 
 # The widget explorer
 class tree_ui:
@@ -58,13 +63,16 @@ class tree_ui:
 
 # The widget adder
 class add_ui:
-    def __init__(self, widget_manager):
+    def __init__(self, widget_manager, display):
 
         # Widget manager
         self.widgets = widget_manager
 
         # Default identifier counter
         self.counter = 0
+
+        # Display window
+        self.display = display
         
         # Set up basic window
         self.root = tk.Toplevel()
@@ -75,8 +83,6 @@ class add_ui:
         self.root.resizable(False, False)
 
         # Set up buttons
-
-        # Images must be 75x75
         """
         imgs = [tk.PhotoImage(file="./resources/btn.png"),
                 tk.PhotoImage(file="./resources/c_btn.png"),
@@ -84,7 +90,7 @@ class add_ui:
                 tk.PhotoImage(file="./resources/entr.png"),
                 tk.PhotoImage(file="./resources/frame.png"),
                 tk.PhotoImage(file="./resources/lbl.png"),
-                tk.PhotoImage(file="./resources/lbl_frame.png"),
+                tk.PhotoImage(file="./resources/lblframe.png"),
                 tk.PhotoImage(file="./resources/prog.png"),
                 tk.PhotoImage(file="./resources/r_btn.png"),
                 tk.PhotoImage(file="./resources/scale.png"),
@@ -97,15 +103,15 @@ class add_ui:
                 tk.PhotoImage(file="./resources/spn_bx.png"),
                 tk.PhotoImage(file="./resources/txt.png")]
         """
-        imgs = [tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
+        imgs = [tk.PhotoImage(file="./resources/btn.png"),
+                tk.PhotoImage(file="./resources/c_btn.png"),
+                tk.PhotoImage(file="./resources/cmbo.png"),
+                tk.PhotoImage(file="./resources/entr.png"),
+                tk.PhotoImage(file="./resources/frame.png"),
+                tk.PhotoImage(file="./resources/lbl.png"),
+                tk.PhotoImage(file="./resources/lblframe.png"),
+                tk.PhotoImage(file="./resources/prog.png"),
+                tk.PhotoImage(file="./resources/r_btn.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
@@ -115,11 +121,15 @@ class add_ui:
                 tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png")]
-        
+
+        bg_unhov = tk.PhotoImage(file = "./resources/bg_unhov.png")
+        bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
+
+        bgs = []
         btns = []
 
         order = ["ttk.Button", "ttk.Checkbutton", "ttk.Combobox", "ttk.Entry",
-                 "ttk.Frame", "ttk.Label", "ttk.LabelFrame", "ttk.ProgressBar",
+                 "ttk.Frame", "tk.Label", "tk.LabelFrame", "ttk.ProgressBar",
                  "ttk.Radiobutton", "ttk.Scale", "ttk.Separator",
                  "ttk.Treeview", "tk.Canvas", "tk.Listbox", "tk.Message",
                  "tk.OptionMenu", "tk.Spinbox", "tk.Text"]
@@ -130,7 +140,8 @@ class add_ui:
         for img in range(len(imgs)):
             
             # Instantiate all of the image labels and add them to 'btns'
-            btns += [ttk.Label(self.root, image = imgs[img])]
+            bgs += [tk.Label(self.root, image = bg_unhov)]
+            btns += [tk.Label(self.root, image = imgs[img])]
 
             # Put them all in the correct places (grid format)
             if (img % 5 == 0) and (img != 0):
@@ -140,19 +151,29 @@ class add_ui:
             elif img != 0:
                 x += 80
 
-            btns[img].place(x = x,y = y)
-
-
+            bgs[img].place(x = x, y = y)
+            btns[img].place(x = x+4, y = y+4)
+            
+            
         # Bind each button to the __add function, so that they add a widget to
         #   the display window when clicked.
+        # Also set up button hovering
         for ii in range(len(btns)):
             btns[ii].bind("<Button-1>", lambda event, me = order[ii]: self.__add(me))
+            
+            btns[ii].bind("<Enter>", lambda event, ind = ii:
+                          bgs[ind].config(image = bg_hov))
+            
+            btns[ii].bind("<Leave>", lambda event, ind = ii:
+                          bgs[ind].config(image = bg_unhov))
             
         self.root.mainloop()
 
     def __add(self, calling_widget):
         self.widgets.add_widget(calling_widget, "widget_" + str(self.counter), self.widgets.root[1],
                                 x = 5, y = 5)
+        self.counter += 1
+        self.display.refresh()
 
 
 class menu_ui():
@@ -188,5 +209,5 @@ self.root.config(menu = menubar)
 
 self.root.mainloop()
 """
-#x = add_ui()
+#x = add_ui(None)
 #x=prompt_ui("Project Name","",None)
