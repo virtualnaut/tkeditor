@@ -517,7 +517,8 @@ class menu_ui:
         pass
         
     def __export(self):
-        prepped = gt.noneify(self.widget_manager.root, self.widget_manager.widgets)
+        #prepped = gt.noneify(self.widget_manager.root, self.widget_manager.widgets)
+        prepped = [self.widget_manager.root, gt.remove_unused(self.widget_manager.widgets)]
         TEMPPATH = "./output/proto.py"
         py_stream = open(TEMPPATH, "w+")
         py_stream.write(cb.generate_class("ui", prepped[0], prepped[1]))

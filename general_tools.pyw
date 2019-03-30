@@ -243,55 +243,31 @@ def coord_validate(x, y, window_width, window_height):
         
     return [err, new]
     
-def noneify(root, widgets):
-    print()
-    print(root)
-    print(widgets)
-    print()
+def remove_unused(widgets):
+    widgets_out = []
     
-    root = list(root)
-    widget = list(widgets)
-    
-    for ii in range(len(root)):
-        if root[ii] == "$NULL$":
-           root[ii] = None
-    """       
     for widget in range(len(widgets)):
-    
-        for property in range(len(widgets[widget])):
-            #print("!"+str(property))
-            if type(widgets[widget][property]) == list:
-                for sub in range(len(widgets[widget][property])):
-                    required = []
-                    print(widget,property,sub)
-                    
-                    if "$NULL$" not in widgets[widget][property][sub]:
-                        required += [widgets[widget][property][sub]]
+        widget_out = []
+        for prop in range(len(widgets[widget])):
+            if "$NULL$" in widgets[widget][prop]:
+                widget_out += [None]
+                
+            elif type(widgets[widget][prop]) == list:
+                cleaned = []
+                
+                for sub in range(len(widgets[widget][prop])):
+                    #print(widgets[widget][prop][sub])
+                    if "$NULL$" not in widgets[widget][prop][sub]:
+                        cleaned += [widgets[widget][prop][sub]]
                         
-                    print(required)
-                    widgets[widget][property] = list(required)
-    """
-    
-    amended = []
-    
-    for widget in widgets:
-        for property in widget:
-            if type(property) == list:
-                for sub in property:
+                widget_out += [cleaned]
                 
-                    required = []
+            else:
+                widget_out += [widgets[widget][prop]]            
+                
+        widgets_out += [widget_out]
                     
-                    if "$NULL$" not in sub:
-                        required += [sub]
+    return widgets_out
 
-                    amended += [required]
-                    
-    for widget in range(len(widgets)):
-        widgets[widget][5] = amended[widget]
-                
-               
-        
-                
-    return [root, widgets]
-
-print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
+#print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
+#print(remove_unused([['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
