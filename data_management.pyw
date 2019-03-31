@@ -1,5 +1,6 @@
 import general_tools as gt
 import code_builder as cb
+import defaults
 
 class IdentifierUsed(Exception):
     pass
@@ -14,8 +15,11 @@ class data_manager:
         # Dictionary of index in self.widgets where a certain widget is stored
         # identifier : index
         self.location = {}
-
-        self.root = [win_type, root_identifier, 500, 400, [], [], []]   # Default .geometry("500x400")
+        
+        self.root = [win_type, root_identifier, defaults.ROOT_WIDTH, defaults.ROOT_HEIGHT, 
+                     [],
+                     [defaults.root_methods()],
+                     []]
 
     def __verify_widget(self, widget_identifier):
         # Check if the identifier is already used
@@ -34,8 +38,11 @@ class data_manager:
 
     def edit_root(self, part, value):
         strs = {"class": 0, "width": 2, "height": 3, "properties": 4, "methods": 5, "bindings": 6}
-
+        
         self.root[strs[part]] = value
+        
+    def edit_root_method(self, method, value):
+        self.root[5][0][method] = value
 
     def edit_widget(self, widget_identifier, part, value):
         # Edit the widget data of the widget using identifier 'widget_identifier'
@@ -44,7 +51,7 @@ class data_manager:
         if (part == "x" or part == "y"):
             value = part+"="+str(value)
 
-        if (part != "identifier") and (part != "properties"):
+        if (part != "identifier") and (part != "properties") and (part != "methods"):
             accepted = self.__data_verif(part, value)
 
             if not accepted:
@@ -58,7 +65,7 @@ class data_manager:
                 self.widgets[self.location[widget_identifier]][1] = value
                 self.location[value] = self.location.pop(widget_identifier)
 
-            else:
+            elif part == "property":
                 # If a property is being changed, change only the property that is supplied,
                 #   and keep all the others.
                 value = value[0]

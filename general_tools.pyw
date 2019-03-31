@@ -269,5 +269,17 @@ def remove_unused(widgets):
                     
     return widgets_out
 
+def method_assemble(identifier, method, arguments):
+    if type(arguments) == str:
+        return identifier + "." + method + "('" + str(arguments) + "')"
+    elif type(arguments) == list:
+        result = identifier + "." + method + "("
+        for ii in arguments:
+            result += str(ii)
+            result += ","
+        result = result[:-1]
+            
+        return result + ")"
+
 #print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
 #print(remove_unused([['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))

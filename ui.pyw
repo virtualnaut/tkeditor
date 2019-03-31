@@ -64,6 +64,13 @@ class display_window:
         # Redraw the root window
         new_width = self.widget_manager.root[2]
         new_height = self.widget_manager.root[3]
+        
+        # Call root methods
+        for method in self.widget_manager.root[5][0].keys():
+            if method == "title":
+                self.root.title(self.widget_manager.root[5][0][method])
+            elif method == "resizable":
+                self.root.resizable(*self.widget_manager.root[5][0][method])
              
         self.root.geometry(str(new_width) + "x" + str(new_height))
 
@@ -295,8 +302,9 @@ class selection_ui:
         self.title.config(text = self.widgets.widgets[self.widgets.location[identifier]][0])
         self.sub.config(text = self.widgets.widgets[self.widgets.location[identifier]][1])
         
+        # Add properties
+        
         properties = self.widgets.tabulate(identifier)
-        print(properties.keys())
         
         self.table.delete(*self.used_iids)
         
@@ -305,9 +313,9 @@ class selection_ui:
         for prop in properties.keys():
             self.table.insert("", "end", iid = prop, values = [prop, properties[prop]])
             self.used_iids += [prop]
-
+        
         self.displaying = identifier
-
+        
     def revert(self):
         self.title.config(text = "Nothing Selected")
         self.sub.config(text = "Properties of selected widgets appear here")
@@ -318,7 +326,9 @@ class selection_ui:
     def root_select(self):
         self.title.config(text = self.widgets.root[0])
         self.sub.config(text = self.widgets.root[1])
-
+        
+        # Add properties
+        
         properties = self.widgets.root_tabulate()
         
         self.table.delete(*self.used_iids)
@@ -328,6 +338,14 @@ class selection_ui:
         for prop in properties.keys():
             self.table.insert("", "end", iid = prop, values = [prop, properties[prop]])
             self.used_iids += [prop]
+            
+        # Add methods
+        
+        methods = self.widgets.root[5][0]
+        
+        for method in methods.keys():
+            self.table.insert("", "end", iid = method, values = [method, methods[method]])
+            self.used_iids += [method]        
 
         self.displaying = "$ROOT$"
 
@@ -362,6 +380,10 @@ class selection_ui:
                     prompt = prompt_ui("Single", "Width", "Please enter a width:")
                 elif selected == "Height":
                     prompt = prompt_ui("Single", "Height", "Please enter a height:")
+                elif selected == "title":
+                    prompt = prompt_ui("Single", "Window Title", "Please enter a window title:")
+                elif selected == "resizable":
+                    prompt = prompt_ui("Tuple", "Resizable", "Please enter true or false:", tuple_elements = 2, tuple_labels = ["x", "y"], tuple_bool = True)
                 
         value = prompt.result
 
@@ -390,46 +412,52 @@ class selection_ui:
                     else:
                         self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
                 else:
-                    warnings = 0
-                    new_width = value[1]
-                    new_height = value[1]
-                    
-                    if selected == "Width":
-                        window_width = int(value[1])
-                        window_height = int(self.widgets.root[3])
-                    else:
-                        window_height = int(value[1])
-                        window_width = int(self.widgets.root[2])
-
-                    warning = False
-                    correctees = []
-                    correct_coords = []
-                    for key in self.display_ui.disp_widg.keys():
-                        check_results = gt.coord_validate(self.display_ui.disp_widg[key].x, self.display_ui.disp_widg[key].y, window_width, window_height)
+                    if selected == "Width" or selected == "Height":
+                        warnings = 0
+                        new_width = value[1]
+                        new_height = value[1]
                         
-                        if check_results[0] == True:
-                            warning = True
+                        if selected == "Width":
+                            window_width = int(value[1])
+                            window_height = int(self.widgets.root[3])
+                        else:
+                            window_height = int(value[1])
+                            window_width = int(self.widgets.root[2])
+    
+                        warning = False
+                        correctees = []
+                        correct_coords = []
+                        for key in self.display_ui.disp_widg.keys():
+                            check_results = gt.coord_validate(self.display_ui.disp_widg[key].x, self.display_ui.disp_widg[key].y, window_width, window_height)
                             
-                        correctees += [key]
-                        correct_coords += [check_results[1]]
+                            if check_results[0] == True:
+                                warning = True
+                                
+                            correctees += [key]
+                            correct_coords += [check_results[1]]
+                            
+                        if warning:
+                            wants_correction = messagebox.askyesno("Move Widgets?", "One or more widgets will be moved to keep them in the window\nAre you sure you want to continue?")
                         
-                    if warning:
-                        wants_correction = messagebox.askyesno("Move Widgets?", "One or more widgets will be moved to keep them in the window\nAre you sure you want to continue?")
-                    
-                        if wants_correction:
-                            for widget in range(len(correctees)):
-                                print(correct_coords[widget][0])
-                                self.widgets.edit_widget(correctees[widget], "x", correct_coords[widget][0])
-                                self.display_ui.disp_widg[correctees[widget]].x = correct_coords[widget][0]
-                                
-                                self.widgets.edit_widget(correctees[widget], "y", correct_coords[widget][1])
-                                self.display_ui.disp_widg[correctees[widget]].y = correct_coords[widget][1]
-                                
-                                self.widgets.edit_root("width", window_width)
-                                self.widgets.edit_root("height", window_height)
+                            if wants_correction:
+                                for widget in range(len(correctees)):
+                                    print(correct_coords[widget][0])
+                                    self.widgets.edit_widget(correctees[widget], "x", correct_coords[widget][0])
+                                    self.display_ui.disp_widg[correctees[widget]].x = correct_coords[widget][0]
+                                    
+                                    self.widgets.edit_widget(correctees[widget], "y", correct_coords[widget][1])
+                                    self.display_ui.disp_widg[correctees[widget]].y = correct_coords[widget][1]
+                                    
+                                    self.widgets.edit_root("width", window_width)
+                                    self.widgets.edit_root("height", window_height)
+                        else:
+                            self.widgets.edit_root("width", window_width)
+                            self.widgets.edit_root("height", window_height)
+
+                    #elif selected == "resizable":
+                    #    pass
                     else:
-                        self.widgets.edit_root("width", window_width)
-                        self.widgets.edit_root("height", window_height)
+                        self.widgets.edit_root_method(selected, value[1])
                     
         # Fully refresh the display
         if self.displaying == "$ROOT$":
@@ -475,6 +503,7 @@ class menu_ui:
         
         btn_new.bind("<Enter>", lambda event: bg_new.config(image = bg_hov))
         btn_new.bind("<Leave>", lambda event: bg_new.config(image = bg_unhov))
+        btn_new.bind("<Button-1>", lambda event: self.__new())
         
         btn_new.config(image = imgs[0])
 
@@ -525,12 +554,13 @@ class menu_ui:
         py_stream.close()
         
     def __new(self):
-        pass
+        print(self.widget_manager.root[5][0])
 
 # This will be used to prompt user for text data.
 class prompt_ui():
-    def __init__(self, window_type, title, message):
-        allowed_types = ["Single"]
+    def __init__(self, window_type, title, message, tuple_elements = 2, tuple_labels = None, tuple_bool = False):
+        self.tuple_bool = tuple_bool
+        allowed_types = ["Single", "Tuple"]
         self.window_type = window_type
         self.result = None
         
@@ -557,7 +587,7 @@ class prompt_ui():
                 self.accept = ttk.Button(self.root, text = "Cancel", command = self.root.destroy)
                 self.accept.place(x = 140, y = 60)
 
-                self.default = ttk.Button(self.root, text = "Default")
+                self.default = ttk.Button(self.root, text = "Default", command = self.__default)
                 self.default.place(x = 60, y = 60)
 
                 # Bindings
@@ -566,7 +596,48 @@ class prompt_ui():
 
             elif window_type == "Explorer":
                 return filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))
+            
+            elif window_type == "Tuple":
+                self.root.geometry("300x" + str(55 + (tuple_elements * 25)))
+                self.root.title(str(title))
 
+                self.message = ttk.Label(self.root, text = str(message))
+                self.message.place(x = 5, y = 5)
+                
+                self.accept = ttk.Button(self.root, text = "Accept", command = self.__accept)
+                self.accept.place(x = 220, y = 28 + (tuple_elements * 25))
+
+                self.accept = ttk.Button(self.root, text = "Cancel", command = self.root.destroy)
+                self.accept.place(x = 140, y = 28 + (tuple_elements * 25))
+
+                self.default = ttk.Button(self.root, text = "Default", command = self.__default)
+                self.default.place(x = 60, y = 28 + (tuple_elements * 25))                
+                
+                self.inputs = []
+                self.labels = []
+                if self.tuple_bool == True:
+                    self.variables = []
+                
+                for ii in range(tuple_elements):
+                    if self.tuple_bool == True:
+                        self.inputs += [ttk.Checkbutton(self.root)]
+                        self.inputs[ii].place(x = 30, y = 30 + (25 * ii))
+                        self.inputs[ii].invoke()
+                        self.inputs[ii].invoke()
+                        self.variables += [tk.IntVar()]
+                        self.inputs[ii].config(variable = self.variables[ii])
+                    else:
+                        self.inputs += [ttk.Entry(self.root, width = 43)]
+                        self.inputs[ii].place(x = 30, y = 30 + (25 * ii))
+                    
+                    if tuple_labels == None:
+                        text = "[" + str(ii) + "]"
+                    else:
+                        text = tuple_labels[ii]
+                        
+                    self.labels += [ttk.Label(self.root, text = text)]
+                    self.labels[ii].place(x = 5, y = 30 + (25 * ii))
+            
             self.root.mainloop()
         else:
             raise ValueError("Please specify a valid type of window.")
@@ -579,6 +650,28 @@ class prompt_ui():
             self.root.quit()
             self.root.destroy()
             self.result = [True, value]
+        
+        elif self.window_type == "Tuple":
+            value = []
+            
+            for ii in range(len(self.inputs)):
+                if not self.tuple_bool:
+                    value += [self.inputs[ii].get()]
+                else:
+                    if self.variables[ii].get() == 0:
+                        value += [False]
+                    else:
+                        value += [True]
+                
+            self.root.quit()
+            self.root.destroy()
+            self.result = [True, value]
+            
+    def __default(self):
+        if self.window_type == "Single":
+            self.root.quit()
+            self.root.destroy()
+            self.result = [True, "$NULL$"]
 
     def __cancel(self):
         self.root.quit()

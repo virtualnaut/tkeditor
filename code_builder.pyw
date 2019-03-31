@@ -69,11 +69,14 @@ def root_translate(data):
     instantiation += identifier + " = " + data[0] + "()\n\n"
 
     # --Translate the methods--
-    methods = ""
+    methods = identifier + ".geometry('" + str(data[2]) + "x" + str(data[3]) + "')\n"
+    print("!!!!!", data)
+    for method in data[5][0].keys():
+        methods += gt.method_assemble(identifier, method, data[5][0][method]) + "\n"
+        
+    print(methods)
 
-    for method in data[4]:
-        methods += identifier + "." + method + "\n"
-
+    """
     # --Translate the bindings--
     bindings = ""
 
@@ -87,7 +90,9 @@ def root_translate(data):
         protocols += identifier + ".protocol(" + protocol + ")\n"
 
     translated = instantiation + methods + bindings + protocols + "\n"
-
+    """
+    translated = instantiation + methods + "\n"
+    print(translated)
     return translated
     
 def generate_class(class_ident, root_data, widg_data):

@@ -1,5 +1,8 @@
 # Generate Default Properties
 
+ROOT_WIDTH = 500
+ROOT_HEIGHT = 400
+
 def gen(widget):
     properties = []
     
@@ -9,3 +12,12 @@ def gen(widget):
         properties = ["text = \"Checkbutton\""]
 
     return properties
+
+def root_methods():
+    methods = {}
+    
+    methods['title'] = "Untitled"
+    methods['resizable'] = [False, False]
+    
+    return methods
+
