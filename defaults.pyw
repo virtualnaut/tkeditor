@@ -10,6 +10,8 @@ def gen(widget):
         properties = ["width = $NULL$", "text = \"Button\""]
     elif widget == "ttk.Checkbutton":
         properties = ["text = \"Checkbutton\""]
+    elif widget == "ttk.Combobox":
+        properties = ["values = $NULL$"]
 
     return properties
 

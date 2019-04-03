@@ -558,9 +558,12 @@ class menu_ui:
 
 # This will be used to prompt user for text data.
 class prompt_ui():
-    def __init__(self, window_type, title, message, tuple_elements = 2, tuple_labels = None, tuple_bool = False):
+    def __init__(self, window_type, title, message, 
+                 tuple_elements = 2, tuple_labels = None, tuple_bool = False,
+                 combo_values = [],
+                 list_preload = []):
         self.tuple_bool = tuple_bool
-        allowed_types = ["Single", "Tuple"]
+        allowed_types = ["Single", "Tuple", "Dropdown", "Explorer", "List"]
         self.window_type = window_type
         self.result = None
         
@@ -595,7 +598,7 @@ class prompt_ui():
                 self.root.bind("<Escape>", lambda event: self.__cancel())
 
             elif window_type == "Explorer":
-                return filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))
+                self.result = [True,"tk.PhotoImage(file='"+filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))+"')"]
             
             elif window_type == "Tuple":
                 self.root.geometry("300x" + str(55 + (tuple_elements * 25)))
@@ -637,7 +640,129 @@ class prompt_ui():
                         
                     self.labels += [ttk.Label(self.root, text = text)]
                     self.labels[ii].place(x = 5, y = 30 + (25 * ii))
+                    
+            elif window_type == "Dropdown":
+                self.root.geometry("300x90")
+                self.root.title(str(title))
+
+                self.message = ttk.Label(self.root, text = str(message))
+                self.message.place(x = 5, y = 5)
+
+                #self.drop_var = tk.StringVar()
+                
+                self.combo = ttk.Combobox(self.root, width = 44, values = combo_values)
+                self.combo.place(x = 5, y = 30)
+                
+                # Buttons
+                self.accept = ttk.Button(self.root, text = "Accept", command = self.__accept)
+                self.accept.place(x = 220, y = 60)
+
+                self.accept = ttk.Button(self.root, text = "Cancel", command = self.root.destroy)
+                self.accept.place(x = 140, y = 60)
+
+                self.default = ttk.Button(self.root, text = "Default", command = self.__default)
+                self.default.place(x = 60, y = 60)
+
+                # Bindings
+                self.root.bind("<Return>", lambda event: self.__accept())
+                self.root.bind("<Escape>", lambda event: self.__cancel())                
             
+            elif window_type == "List":
+                
+                def get_select():
+                    if len(self.list_disp.curselection()) != 0:
+                        self.selected = self.list_disp.curselection()[0]
+                        self.entry_txt.set(self.list_disp.get(self.selected))
+                    else:
+                        pass
+                
+                def listbox_update():
+                    self.list_disp.delete(self.selected)
+                    self.list_disp.insert(self.selected, self.entry_txt.get())
+                
+                def enter_pressed(event):
+                    if isinstance(event.widget, ttk.Entry):
+                        listbox_update()
+                    else:
+                        self.__accept()
+                        
+                def move_up():
+                    if self.selected != 0:
+                        text = self.list_disp.get(self.selected)
+                        self.list_disp.delete(self.selected)
+                        self.list_disp.insert(self.selected - 1, text)
+                        self.selected -= 1
+                        self.list_disp.selection_set(self.selected)
+                        
+                def move_down():
+                    print(self.list_disp.size())
+                    if self.selected != self.list_disp.size() - 1:
+                        text = self.list_disp.get(self.selected)
+                        self.list_disp.delete(self.selected)
+                        self.list_disp.insert(self.selected + 1, text)
+                        self.selected += 1
+                        self.list_disp.selection_set(self.selected)                    
+                   
+                self.selected = 0
+                    
+                self.root.geometry("450x390")
+                self.root.title(str(title))
+                
+                self.message = ttk.Label(self.root, text = str(message))
+                self.message.place(x = 5, y = 5)            
+                
+                display = tk.Frame(self.root)
+                display.place(x = 5, y = 27)
+                
+                self.list_disp = tk.Listbox(display, width = 30, height = 20, exportselection = False)
+                self.list_disp.pack(side = "left", fill = "y")
+                
+                scrollbar=ttk.Scrollbar(display, orient = "vertical", command = self.list_disp.yview)
+                scrollbar.pack(side = "right", fill = "y")
+                
+                self.list_disp.config(yscrollcommand = scrollbar.set)
+                
+                self.list_disp.bind("<<ListboxSelect>>", lambda event: get_select())
+                
+                for ii in list_preload:
+                    self.list_disp.insert("end",ii)
+                    
+                self.entry_txt = tk.StringVar()
+                
+                self.edit_entry = ttk.Entry(self.root, width = 30, textvariable = self.entry_txt)
+                self.edit_entry.place(x = 215, y = 27)
+                
+                name_go = ttk.Button(self.root, text = "Set", width = 4, command = listbox_update)
+                name_go.place(x = 408, y = 25)
+                
+                self.new = ttk.Button(self.root, text = "New Element", width = 17, command = lambda: self.list_disp.insert("end", "New Element"))
+                self.new.place(x = 215, y = 54)
+                
+                self.remove = ttk.Button(self.root, text = "Remove Element", width = 17)
+                self.remove.place(x = 330, y = 54)
+                
+                self.up = ttk.Button(self.root, text = chr(11014), width = 3, command = move_up)
+                self.up.place(x = 215, y = 100)
+                
+                self.down = ttk.Button(self.root, text = chr(11015), width = 3, command = move_down)
+                self.down.place(x = 215, y = 300)                
+                
+                # Buttons
+                self.accept = ttk.Button(self.root, text = "Accept", command = self.__accept)
+                self.accept.place(x = 370, y = 360)
+
+                self.cancel = ttk.Button(self.root, text = "Cancel", command = self.root.destroy)
+                self.cancel.place(x = 290, y = 360)
+
+                self.default = ttk.Button(self.root, text = "Default", command = self.__default)
+                self.default.place(x = 210, y = 360)
+
+                # Bindings
+                self.root.bind("<Return>", enter_pressed)
+                self.root.bind("<Escape>", lambda event: self.__cancel())   
+                #self.root.bind("<Button-1>", click_out)
+                
+                
             self.root.mainloop()
         else:
             raise ValueError("Please specify a valid type of window.")
@@ -667,6 +792,20 @@ class prompt_ui():
             self.root.destroy()
             self.result = [True, value]
             
+        elif self.window_type == "Dropdown":  
+            self.result = [True, self.combo.get()]
+            self.root.quit()
+            self.root.destroy()  
+            
+        elif self.window_type == "List":
+            items = []
+            for item in range(self.list_disp.size()):
+                items += [self.list_disp.get(item)]
+                
+            self.result = [True, items]
+            self.root.quit()
+            self.root.destroy()
+            
     def __default(self):
         if self.window_type == "Single":
             self.root.quit()
@@ -677,3 +816,5 @@ class prompt_ui():
         self.root.quit()
         self.root.destroy()
         self.result = [False, None]
+        
+x=prompt_ui("List", "A", "B", list_preload=["optA","optB","optC"])

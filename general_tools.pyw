@@ -174,7 +174,7 @@ def prompt_type(prop):
             return ["Explorer"]
         
         elif prop == "cursor":
-            return ["DD", "Cursor" , "Please select a cursor to be displayed:",
+            return ["Dropdown", "Cursor" , "Please select a cursor to be displayed:",
                     ["arrow", "based_arrow_down", "based_arrow_up", "boat", "bogosity",
                      "bottom_left_corner", "bottom_right_corner", "bottom_side", "bottom_tee",
                      "box_spiral", "center_ptr", "circle", "clock", "coffee_mug", "cross",
@@ -198,7 +198,7 @@ def prompt_type(prop):
             return ["List"]
         
         elif prop == "justify":
-            return ["DD", "Justify", "Please specify the justification", ["left", "right", "center"]]
+            return ["Dropdown", "Justify", "Please specify the justification", ["left", "right", "center"]]
 
     else:
         raise ValueError("Please specify a valid property.")
