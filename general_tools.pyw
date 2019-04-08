@@ -156,7 +156,8 @@ def keyword_convert(properties):
 
     return keywords
 
-def prompt_type(prop):
+"""
+def prompt_type_OLD(prop, additional):
     valid_props = ["width", "height", "text", "image", "cursor",
                    "takefocus", "values", "justify"]
 
@@ -202,6 +203,75 @@ def prompt_type(prop):
 
     else:
         raise ValueError("Please specify a valid property.")
+"""
+    
+def prompt_type(prop, additional):
+    valid_props = ["width", "height", "text", "image", "cursor",
+                   "takefocus", "values", "justify"]
+    
+    if prop in valid_props:
+        if prop == "width":
+            return {"window_type":"Single",
+                    "title":"Width",
+                    "message":"Please specify a width:",
+                    "single_preload":additional}
+        
+        elif prop == "height":
+            return {"window_type":"Single",
+                    "title":"Height",
+                    "message":"Please specify a height:",
+                    "single_preload":additional}
+        
+        elif prop == "text":
+            return {"window_type":"Single",
+                    "title":"Text",
+                    "message":"Please specify some text:",
+                    "single_preload":additional}
+        
+        elif prop == "image":
+            return {"window_type":"Single"}
+        
+        elif prop == "cursor":
+            return {"window_type":"Dropdown",
+                    "title":"Cursor",
+                    "message":"Please select a cursor to be displayed on hovering:",
+                    "combo_values":["arrow", "based_arrow_down", "based_arrow_up", "boat", "bogosity",
+                                    "bottom_left_corner", "bottom_right_corner", "bottom_side", "bottom_tee",
+                                    "box_spiral", "center_ptr", "circle", "clock", "coffee_mug", "cross",
+                                    "cross_reverse", "crosshair", "diamond_cross", "dot", "dotbox",
+                                    "double_arrow", "draft_large", "draft_small", "draped_box", "exchange",
+                                    "fleur", "gobbler", "gumby", "hand1", "hand2", "heart", "icon",
+                                    "iron_cross", "left_ptr", "left_side", "left_tee", "leftbutton",
+                                    "ll_angle", "lr_angle", "man", "middlebutton", "mouse", "pencil",
+                                    "pirate", "plus", "question_arrow", "right_ptr", "right_side",
+                                    "right_tee", "rightbutton", "rtl_logo", "sailboat", "sb_down_arrow",
+                                    "sb_h_double_arrow", "sb_left_arrow", "sb_right_arrow", "sb_up_arrow",
+                                    "sb_v_double_arrow", "shuttle", "sizing", "spider", "spraycan", "star",
+                                    "target", "tcross", "top_left_arrow", "top_left_corner", "top_right_corner",
+                                    "top_side", "top_tee", "trek", "ul_angle", "umbrella", "ur_angle", "watch",
+                                    "xterm", "X_cursor"],
+                    "combo_preload":additional} 
+        
+        elif prop == "takefocus":
+            return {"window_type":"Checkbox",
+                    "title":"Take Focus",
+                    "message":"Is the widget selectable by tab?",
+                    "checkbox_preload":additional}
+        
+        elif prop == "values":
+            return {"window_type":"List",
+                    "title":"Values",
+                    "message":"Values displayed in the combobox:",
+                    "list_preload":additional}
+        
+        elif prop == "justify":
+            return {"window_type":"Dropdown",
+                    "title":"Justification",
+                    "message":"The justification of the text:",
+                    "combo_values":["left", "right", "center"],
+                    "combo_preload":additional}
+        
+        
 
 def property_strip(prop):
     for char in range(len(prop)):
@@ -280,6 +350,47 @@ def method_assemble(identifier, method, arguments):
         result = result[:-1]
             
         return result + ")"
+
+def string_list_parse(string_list):
+    string_list = string_list[1:]
+    result = []
+    
+    in_string = False
+    current_string_terminator = None
+    term = ""
+    
+    for char in string_list:
+
+        if ((char == '"') or (char == "'")) and not in_string:
+            current_string_terminator = char
+            in_string = True
+
+        elif in_string and (char == current_string_terminator):
+            in_string = False
+            current_string_terminator = None
+        
+        if in_string and (char != current_string_terminator):
+            term += char
+            
+        if ((char == ",") or (char == "]")) and not in_string:
+            result += [term]
+            term_is_string = False
+            term = ""
+                        
+    return result
+        
+def type_fix(keyword_dict):
+    list_types = ["values"]
+    bool_tuple_types = ["resizable"]
+    
+    for key in keyword_dict.keys():
+        if key in list_types:
+            if keyword_dict[key] != None:
+                keyword_dict[key] = string_list_parse(keyword_dict[key])
+        if key in bool_tuple_types:
+            keyword_dict[key] = keyword_dict[key][1:-1].split(",")
+            
+    return keyword_dict
 
 #print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
 #print(remove_unused([['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))

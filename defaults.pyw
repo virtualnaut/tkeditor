@@ -7,7 +7,7 @@ def gen(widget):
     properties = []
     
     if widget == "ttk.Button":
-        properties = ["width = $NULL$", "text = \"Button\""]
+        properties = ["width = $NULL$", "text = \"Button\"", "takefocus = False"]
     elif widget == "ttk.Checkbutton":
         properties = ["text = \"Checkbutton\""]
     elif widget == "ttk.Combobox":

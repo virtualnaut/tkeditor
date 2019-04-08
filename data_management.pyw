@@ -20,6 +20,9 @@ class data_manager:
                      [],
                      [defaults.root_methods()],
                      []]
+        
+        # Only update the root window when it is needed
+        self.root_update_required = False
 
     def __verify_widget(self, widget_identifier):
         # Check if the identifier is already used
@@ -65,11 +68,11 @@ class data_manager:
                 self.widgets[self.location[widget_identifier]][1] = value
                 self.location[value] = self.location.pop(widget_identifier)
 
-            elif part == "property":
+            elif part == "properties":
                 # If a property is being changed, change only the property that is supplied,
                 #   and keep all the others.
                 value = value[0]
-
+                
                 index = gt.property_find(self.widgets[self.location[widget_identifier]][5], value)
                 self.widgets[self.location[widget_identifier]][5][index] = value
 

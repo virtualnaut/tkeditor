@@ -55,24 +55,26 @@ class display_window:
 
             # Instantiate the widget
             self.disp_widg[widget[1]] = widg.movable(widget[0], self.root, self.effect_canv,
-                                                     **gt.keyword_convert(widget[5]))
+                                                     **gt.type_fix(gt.keyword_convert(widget[5])))
 
             # Put the widget in the correct place, removing the "x=" part and any spaces
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
-            
-        # Redraw the root window
-        new_width = self.widget_manager.root[2]
-        new_height = self.widget_manager.root[3]
         
-        # Call root methods
-        for method in self.widget_manager.root[5][0].keys():
-            if method == "title":
-                self.root.title(self.widget_manager.root[5][0][method])
-            elif method == "resizable":
-                self.root.resizable(*self.widget_manager.root[5][0][method])
-             
-        self.root.geometry(str(new_width) + "x" + str(new_height))
+        if self.widget_manager.root_update_required:
+            # Redraw the root window
+            new_width = self.widget_manager.root[2]
+            new_height = self.widget_manager.root[3]
+            
+            # Call root methods
+            for method in self.widget_manager.root[5][0].keys():
+                if method == "title":
+                    self.root.title(self.widget_manager.root[5][0][method])
+                elif method == "resizable":
+                    self.root.resizable(*self.widget_manager.root[5][0][method])
+                 
+            self.root.geometry(str(new_width) + "x" + str(new_height))
+            self.widget_manager.root_update_required = False
 
     def ui_supply(self, ui):
         self.selection_ui = ui
@@ -359,31 +361,36 @@ class selection_ui:
 
                 # Changing X Coord
                 if selected == "X-Coord":
-                    prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:")
+                    prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:", default_value = 0,
+                                       single_preload = self.widgets.widgets[self.widgets.location[self.displaying]][3].replace(" ","")[2:])
 
                 # Changing Y Coord
                 elif selected == "Y-Coord":
-                    prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:")
+                    prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:", default_value = 0,
+                                       single_preload = self.widgets.widgets[self.widgets.location[self.displaying]][4].replace(" ","")[2:])
 
                 # Changing Identifier
                 elif selected == "Identifier":
-                    prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:")
+                    prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:",
+                                       default_value = self.widgets.widgets[self.widgets.location[self.displaying]][1],
+                                       single_preload = self.widgets.widgets[self.widgets.location[self.displaying]][1])
 
                 # Changing a Property
                 else:
-                    prompt_data = gt.prompt_type(selected)
-                    prompt = prompt_ui(*prompt_data)
+                    prompt_data = gt.prompt_type(selected, gt.type_fix(gt.keyword_convert(self.widgets.widgets[self.widgets.location[self.displaying]][5]))[selected])
+                    prompt = prompt_ui(**prompt_data)
                     
             else:
                 selected = self.table.selection()[0]
                 if selected == "Width":
-                    prompt = prompt_ui("Single", "Width", "Please enter a width:")
+                    prompt = prompt_ui("Single", "Width", "Please enter a width:", default_value = 100, single_preload = self.widgets.root[2])
                 elif selected == "Height":
-                    prompt = prompt_ui("Single", "Height", "Please enter a height:")
+                    prompt = prompt_ui("Single", "Height", "Please enter a height:", default_value = 100, single_preload = self.widgets.root[3])
                 elif selected == "title":
-                    prompt = prompt_ui("Single", "Window Title", "Please enter a window title:")
+                    prompt = prompt_ui("Single", "Window Title", "Please enter a window title:", default_value = "tk", single_preload = self.widgets.root[5][0]["title"])
                 elif selected == "resizable":
-                    prompt = prompt_ui("Tuple", "Resizable", "Please enter true or false:", tuple_elements = 2, tuple_labels = ["x", "y"], tuple_bool = True)
+                    prompt = prompt_ui("Tuple", "Resizable", "Please enter true or false:", default_value = [False, False],
+                                       tuple_elements = 2, tuple_labels = ["x", "y"], tuple_bool = True, tuple_preload = self.widgets.root[5][0]["resizable"])
                 
         value = prompt.result
 
@@ -410,8 +417,10 @@ class selection_ui:
                         self.display_ui.disp_widg[self.displaying].y = int(value[1])
 
                     else:
+                        print("OCCUR")
                         self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
                 else:
+                    self.widgets.root_update_required = True
                     if selected == "Width" or selected == "Height":
                         warnings = 0
                         new_width = value[1]
@@ -558,12 +567,14 @@ class menu_ui:
 
 # This will be used to prompt user for text data.
 class prompt_ui():
-    def __init__(self, window_type, title, message, 
+    def __init__(self, window_type, title, message, default_value = "$NULL$",
                  tuple_elements = 2, tuple_labels = None, tuple_bool = False,
                  combo_values = [],
-                 list_preload = []):
+                 single_preload = None, tuple_preload = (), list_preload = [], combo_preload = None, checkbox_preload = None):
+        
+        self.default_value = default_value
         self.tuple_bool = tuple_bool
-        allowed_types = ["Single", "Tuple", "Dropdown", "Explorer", "List"]
+        allowed_types = ["Single", "Tuple", "Dropdown", "Explorer", "List", "Checkbox"]
         self.window_type = window_type
         self.result = None
         
@@ -571,6 +582,8 @@ class prompt_ui():
             # Master window
             self.root = tk.Toplevel()
             self.root.resizable(False, False)
+            self.root.grab_set()
+            self.root.protocol("WM_DELETE_WINDOW", self.__cancel)
 
             # A window for entering a single value e.g. string for text, or a number for coords
             if window_type == "Single":
@@ -579,10 +592,16 @@ class prompt_ui():
 
                 self.message = ttk.Label(self.root, text = str(message))
                 self.message.place(x = 5, y = 5)
-
+                
+                self.input_txt = tk.StringVar()
+                
                 # Buttons
-                self.input = ttk.Entry(self.root, width = 47)
+                self.input = ttk.Entry(self.root, width = 47, textvariable = self.input_txt)
                 self.input.place(x = 5, y = 30)
+                
+                
+                if (single_preload != "$NULL$") and (single_preload != None):
+                    self.input_txt.set(single_preload)
 
                 self.accept = ttk.Button(self.root, text = "Accept", command = self.__accept)
                 self.accept.place(x = 220, y = 60)
@@ -600,7 +619,15 @@ class prompt_ui():
             elif window_type == "Explorer":
                 self.result = [True,"tk.PhotoImage(file='"+filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))+"')"]
             
-            elif window_type == "Tuple":
+            elif (window_type == "Tuple") or (window_type == "Checkbox"):
+                print(window_type)
+                if window_type == "Checkbox":
+                    tuple_elements = 1
+                    tuple_labels = [""]
+                    self.tuple_bool = True
+                    tuple_preload = tuple([checkbox_preload])
+                    self.additional_considerations = "Checkbox"
+                
                 self.root.geometry("300x" + str(55 + (tuple_elements * 25)))
                 self.root.title(str(title))
 
@@ -622,6 +649,7 @@ class prompt_ui():
                     self.variables = []
                 
                 for ii in range(tuple_elements):
+                    
                     if self.tuple_bool == True:
                         self.inputs += [ttk.Checkbutton(self.root)]
                         self.inputs[ii].place(x = 30, y = 30 + (25 * ii))
@@ -629,6 +657,11 @@ class prompt_ui():
                         self.inputs[ii].invoke()
                         self.variables += [tk.IntVar()]
                         self.inputs[ii].config(variable = self.variables[ii])
+
+                        if (tuple_preload[ii] == "True") or (tuple_preload[ii] == True):
+                            self.inputs[ii].invoke()                    
+                        
+
                     else:
                         self.inputs += [ttk.Entry(self.root, width = 43)]
                         self.inputs[ii].place(x = 30, y = 30 + (25 * ii))
@@ -662,6 +695,9 @@ class prompt_ui():
 
                 self.default = ttk.Button(self.root, text = "Default", command = self.__default)
                 self.default.place(x = 60, y = 60)
+                
+                if (combo_preload != "$NULL$") and (combo_preload != None):
+                    self.combo.set(combo_preload)
 
                 # Bindings
                 self.root.bind("<Return>", lambda event: self.__accept())
@@ -724,8 +760,9 @@ class prompt_ui():
                 
                 self.list_disp.bind("<<ListboxSelect>>", lambda event: get_select())
                 
-                for ii in list_preload:
-                    self.list_disp.insert("end",ii)
+                if (list_preload != "$NULL$") and (list_preload != None):
+                    for ii in list_preload:
+                        self.list_disp.insert("end",ii)
                     
                 self.entry_txt = tk.StringVar()
                 
@@ -770,10 +807,12 @@ class prompt_ui():
         
         
     def __accept(self):
+        self.root.grab_release()
         if self.window_type == "Single":
             value = self.input.get()
             self.root.quit()
             self.root.destroy()
+            print("!!!!!",value)
             self.result = [True, value]
         
         elif self.window_type == "Tuple":
@@ -790,31 +829,52 @@ class prompt_ui():
                 
             self.root.quit()
             self.root.destroy()
+            
             self.result = [True, value]
+                
             
         elif self.window_type == "Dropdown":  
             self.result = [True, self.combo.get()]
             self.root.quit()
-            self.root.destroy()  
+            self.root.destroy()
             
         elif self.window_type == "List":
             items = []
             for item in range(self.list_disp.size()):
                 items += [self.list_disp.get(item)]
-                
+            print(items)
             self.result = [True, items]
             self.root.quit()
             self.root.destroy()
             
-    def __default(self):
-        if self.window_type == "Single":
+        elif self.window_type == "Checkbox":
+            value = self.variables[0].get()
+            
+            if value == 0:
+                value = False
+            else:
+                value = True
+                
             self.root.quit()
             self.root.destroy()
-            self.result = [True, "$NULL$"]
+        
+            self.result = [True, value]            
+            
+    def __default(self):
+        self.root.grab_release()
+        self.root.quit()
+        self.root.destroy()        
+        
+        if self.window_type == "Single":
+            self.result = [True, self.default_value]
+        
+        elif self.window_type == "Tuple":
+            self.result = [True, list(self.default_value)]
 
     def __cancel(self):
+        self.root.grab_release()
         self.root.quit()
         self.root.destroy()
         self.result = [False, None]
         
-x=prompt_ui("List", "A", "B", list_preload=["optA","optB","optC"])
+#x=prompt_ui("List", "A", "B", list_preload=["optA","optB","optC"])

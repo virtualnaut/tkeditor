@@ -96,7 +96,7 @@ class mButton(ttk.Button):
 
     def __kwarg_validate(self, values):
         # If one of the arguments' keywords is not in 'valid', raise TypeError
-        valid = ["width","height","text","command","image","cursor", "style"]
+        valid = ["width","height","text","command","image","cursor", "style","takefocus"]
         for arg in values.keys():
             if arg not in valid:
                 raise TypeError("Invalid keyword argument: "+arg)
