@@ -29,6 +29,7 @@ class display_window:
         
         #self.root.iconbitmap()         # Window's icon
         self.root.title("Untitled")     # The title of the window
+        self.root.iconbitmap("./resources/icon.ico")
 
         # Set up deselection
         self.root.bind("<Button-1>", self.__possible_selection)
@@ -127,6 +128,7 @@ class tree_ui:
 
         # Stop the user being able to resize the window
         self.root.resizable(False, False)
+        self.root.iconbitmap("./resources/icon.ico")
 
     def __update(self):
         pass
@@ -151,6 +153,7 @@ class add_ui:
         self.root.title("tkEditor - Add Widgets")
         
         self.root.resizable(False, False)
+        self.root.iconbitmap("./resources/icon.ico")
 
         # Set up buttons
         """
@@ -271,6 +274,8 @@ class selection_ui:
 
         # Stop the user being able to resize the window
         self.root.resizable(False, False)
+        
+        self.root.iconbitmap("./resources/icon.ico")
 
         self.title = ttk.Label(self.root, text = "Nothing Selected", font = ("Arial Bold", 18))
         self.title.place(x = 5, y = 5)
@@ -488,12 +493,13 @@ class menu_ui:
         self.root = tk.Toplevel()
         self.root.geometry("285x100")
         self.root.title("Menu")
+        self.root.iconbitmap("./resources/icon.ico")
         
         # Buttons
         
-        imgs = [tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png")]
+        imgs = [tk.PhotoImage(file="./resources/save_file.png"),
+                tk.PhotoImage(file="./resources/export_file.png"),
+                tk.PhotoImage(file="./resources/new_file.png")]
                 
         bg_unhov = tk.PhotoImage(file = "./resources/bg_unhov.png")
         bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
@@ -584,6 +590,7 @@ class prompt_ui():
             self.root.resizable(False, False)
             self.root.grab_set()
             self.root.protocol("WM_DELETE_WINDOW", self.__cancel)
+            self.root.iconbitmap("./resources/icon.ico")
 
             # A window for entering a single value e.g. string for text, or a number for coords
             if window_type == "Single":
