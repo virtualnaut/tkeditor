@@ -78,7 +78,7 @@ class data_manager:
 
 
     def add_widget(self, widget_class, widget_identifier, parent,
-                   x = 5, y = 5, properties = [], methods = [],
+                   x = 5, y = 5, properties = [], methods = [{}],
                    bindings = []):
 
         # Add a new widget to self.widgets
@@ -114,7 +114,6 @@ class data_manager:
             pass
 
         elif part == "x":
-            print(value+"?")
             if str(value)[:2] != "x=":
                 value = "x=" + str(value)
             try:

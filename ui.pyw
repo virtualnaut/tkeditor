@@ -9,6 +9,7 @@ import widgets as widg
 import general_tools as gt
 import defaults
 import code_builder as cb
+import fileio
 
 # The window where widget arrangement etc. happens
 class display_window:
@@ -43,15 +44,13 @@ class display_window:
 
     def refresh(self):
         
-        # Delete the old widgets and update coords
+        # Delete the old widgets
         for key in self.disp_widg.keys():
-            self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
-            self.widget_manager.edit_widget(key, "y", self.disp_widg[key].y)
-            
             self.disp_widg[key].destroy()
-
+        
         # Redraw the widgets as they were
         self.disp_widg = {}
+        
         for widget in self.widget_manager.widgets:
 
             # Instantiate the widget
@@ -61,6 +60,11 @@ class display_window:
             # Put the widget in the correct place, removing the "x=" part and any spaces
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
+
+        # Update coords
+        for key in self.disp_widg.keys():
+            self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
+            self.widget_manager.edit_widget(key, "y", self.disp_widg[key].y)         
         
         if self.widget_manager.root_update_required:
             # Redraw the root window
@@ -72,7 +76,7 @@ class display_window:
                 if method == "title":
                     self.root.title(self.widget_manager.root[5][0][method])
                 elif method == "resizable":
-                    self.root.resizable(*self.widget_manager.root[5][0][method])
+                    self.root.resizable(*gt.bool_list_parse(self.widget_manager.root[5][0][method]))
                  
             self.root.geometry(str(new_width) + "x" + str(new_height))
             self.widget_manager.root_update_required = False
@@ -412,17 +416,14 @@ class selection_ui:
                         self.displaying = value[1]
                         
                     elif selected == "X-Coord":
-                        print(value[1])
                         self.widgets.edit_widget(self.displaying, "x", value[1])
                         self.display_ui.disp_widg[self.displaying].x = int(value[1])
 
                     elif selected == "Y-Coord":
-                        print(value[1])
                         self.widgets.edit_widget(self.displaying, "y", value[1])
                         self.display_ui.disp_widg[self.displaying].y = int(value[1])
 
                     else:
-                        print("OCCUR")
                         self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
                 else:
                     self.widgets.root_update_required = True
@@ -455,7 +456,6 @@ class selection_ui:
                         
                             if wants_correction:
                                 for widget in range(len(correctees)):
-                                    print(correct_coords[widget][0])
                                     self.widgets.edit_widget(correctees[widget], "x", correct_coords[widget][0])
                                     self.display_ui.disp_widg[correctees[widget]].x = correct_coords[widget][0]
                                     
@@ -480,26 +480,30 @@ class selection_ui:
             self.set_display(self.displaying)
             self.display_ui.selection_box_fix(self.displaying)
          
-        print("REFRESHING")
         self.display_ui.refresh()
         
 class menu_ui:
-    def __init__(self, widget_manager):
+    def __init__(self, widget_manager, display_ui, selection_ui):
         
         # Widget Manager, for export data
         self.widget_manager = widget_manager
         
+        # Display and Selection UIs, for refreshing
+        self.display_ui = display_ui
+        self.selection_ui = selection_ui
+        
         # Set Up Window
         self.root = tk.Toplevel()
-        self.root.geometry("285x100")
+        self.root.geometry("369x100")
         self.root.title("Menu")
         self.root.iconbitmap("./resources/icon.ico")
         
         # Buttons
         
-        imgs = [tk.PhotoImage(file="./resources/save_file.png"),
-                tk.PhotoImage(file="./resources/export_file.png"),
-                tk.PhotoImage(file="./resources/new_file.png")]
+        imgs = [tk.PhotoImage(file="./resources/new_file.png"),
+                tk.PhotoImage(file="./resources/load_file.png"),
+                tk.PhotoImage(file="./resources/save_file.png"),
+                tk.PhotoImage(file="./resources/export_file.png")]
                 
         bg_unhov = tk.PhotoImage(file = "./resources/bg_unhov.png")
         bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
@@ -522,23 +526,23 @@ class menu_ui:
         
         btn_new.config(image = imgs[0])
 
-        # Export UI
-        bg_exp = ttk.Label(self.root)
-        btn_exp = ttk.Label(self.root)
+        # Load UI
+        bg_load = ttk.Label(self.root)
+        btn_load = ttk.Label(self.root)
         
-        bg_exp.image = bg_unhov
-        btn_exp.image = imgs[1]
+        bg_load.image = bg_unhov
+        btn_load.image = imgs[1]
         
-        bg_exp.config(image = bg_unhov)
+        bg_load.config(image = bg_unhov)
         
-        bg_exp.place(x=100,y=10)
-        btn_exp.place(x=104,y=14)
+        bg_load.place(x=100,y=10)
+        btn_load.place(x=104,y=14)
         
-        btn_exp.bind("<Enter>", lambda event: bg_exp.config(image = bg_hov))
-        btn_exp.bind("<Leave>", lambda event: bg_exp.config(image = bg_unhov))
-        btn_exp.bind("<Button-1>", lambda event: self.__export())
+        btn_load.bind("<Enter>", lambda event: bg_load.config(image = bg_hov))
+        btn_load.bind("<Leave>", lambda event: bg_load.config(image = bg_unhov))
+        btn_load.bind("<Button-1>", lambda event: self.__load())
         
-        btn_exp.config(image = imgs[1])
+        btn_load.config(image = imgs[1])        
         
         # Save UI
         bg_sav = ttk.Label(self.root)
@@ -554,22 +558,72 @@ class menu_ui:
         
         btn_sav.bind("<Enter>", lambda event: bg_sav.config(image = bg_hov))
         btn_sav.bind("<Leave>", lambda event: bg_sav.config(image = bg_unhov))
+        btn_sav.bind("<Button-1>", lambda event: self.__save())
         
         btn_sav.config(image = imgs[2])
         
+        # Export UI
+        bg_exp = ttk.Label(self.root)
+        btn_exp = ttk.Label(self.root)
+        
+        bg_exp.image = bg_unhov
+        btn_exp.image = imgs[3]
+        
+        bg_exp.config(image = bg_unhov)
+        
+        bg_exp.place(x=280,y=10)
+        btn_exp.place(x=284,y=14)
+        
+        btn_exp.bind("<Enter>", lambda event: bg_exp.config(image = bg_hov))
+        btn_exp.bind("<Leave>", lambda event: bg_exp.config(image = bg_unhov))
+        btn_exp.bind("<Button-1>", lambda event: self.__export())
+        
+        btn_exp.config(image = imgs[3])        
+        
+    def __new(self):
+        print(self.widget_manager.root)
+        print(self.widget_manager.widgets)
+        
+    def __load(self):
+        load_path = filedialog.askopenfilename(initialdir = "./", title = "Select a file", filetypes = (("tkEditor Files","*.tkw"),))
+        valid = False
+        if load_path != "":
+            try:
+                loaded = fileio.load_data(load_path)
+                valid = True
+            except:
+                messagebox.showerror("Error Loading File", "The selected file may be invalid.\nFile loading aborted.")
+        
+        if not messagebox.askyesno("Load File", "Are you sure you want to load another file? Your current project will\nbe lost."):
+            valid = False
+            
+        if valid:
+            self.widget_manager.root = loaded[0]
+            self.widget_manager.widgets = loaded[1]
+            self.widget_manager.location = loaded[2]
+            self.widget_manager.root_update_required = True
+            self.display_ui.refresh()
+            self.selection_ui.revert()
+        
     def __save(self):
-        pass
+        root = self.widget_manager.root
+        widgets = self.widget_manager.widgets
+        
+        save_path = filedialog.asksaveasfilename(initialdir = "./", title = "Save as", filetypes = (("tkEditor Files","*.tkw"),))
+        if save_path[-4:] != ".tkw":
+            save_path += ".tkw"
+            
+        fileio.save_data(save_path, root, widgets)
+        
         
     def __export(self):
-        #prepped = gt.noneify(self.widget_manager.root, self.widget_manager.widgets)
         prepped = [self.widget_manager.root, gt.remove_unused(self.widget_manager.widgets)]
         TEMPPATH = "./output/proto.py"
         py_stream = open(TEMPPATH, "w+")
         py_stream.write(cb.generate_class("ui", prepped[0], prepped[1]))
         py_stream.close()
         
-    def __new(self):
-        print(self.widget_manager.root[5][0])
+    
 
 # This will be used to prompt user for text data.
 class prompt_ui():
@@ -627,7 +681,6 @@ class prompt_ui():
                 self.result = [True,"tk.PhotoImage(file='"+filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))+"')"]
             
             elif (window_type == "Tuple") or (window_type == "Checkbox"):
-                print(window_type)
                 if window_type == "Checkbox":
                     tuple_elements = 1
                     tuple_labels = [""]
@@ -738,7 +791,6 @@ class prompt_ui():
                         self.list_disp.selection_set(self.selected)
                         
                 def move_down():
-                    print(self.list_disp.size())
                     if self.selected != self.list_disp.size() - 1:
                         text = self.list_disp.get(self.selected)
                         self.list_disp.delete(self.selected)
@@ -819,7 +871,6 @@ class prompt_ui():
             value = self.input.get()
             self.root.quit()
             self.root.destroy()
-            print("!!!!!",value)
             self.result = [True, value]
         
         elif self.window_type == "Tuple":
@@ -849,7 +900,6 @@ class prompt_ui():
             items = []
             for item in range(self.list_disp.size()):
                 items += [self.list_disp.get(item)]
-            print(items)
             self.result = [True, items]
             self.root.quit()
             self.root.destroy()

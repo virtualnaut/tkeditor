@@ -392,5 +392,19 @@ def type_fix(keyword_dict):
             
     return keyword_dict
 
+def bool_list_parse(string):
+    if type(string) == str:
+        listified = string[1:-1].split(", ")
+        
+        for element in range(len(listified)):
+            if listified[element] == "True":
+                listified[element] = True
+            else:
+                listified[element] = False
+            
+        return listified
+    else:
+        return string
+
 #print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
 #print(remove_unused([['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))

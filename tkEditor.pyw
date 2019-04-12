@@ -11,7 +11,7 @@ select.ui_supply(disp)
 disp.ui_supply(select)
 
 add = ui.add_ui(widget_manager, disp)
-menu = ui.menu_ui(widget_manager)
+menu = ui.menu_ui(widget_manager, disp, select)
 
 select.start()
 
