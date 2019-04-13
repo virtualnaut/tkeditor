@@ -43,7 +43,6 @@ class display_window:
         #self.root.mainloop()
 
     def refresh(self):
-        
         # Delete the old widgets
         for key in self.disp_widg.keys():
             self.disp_widg[key].destroy()
@@ -64,8 +63,8 @@ class display_window:
         # Update coords
         for key in self.disp_widg.keys():
             self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
-            self.widget_manager.edit_widget(key, "y", self.disp_widg[key].y)         
-        
+            self.widget_manager.edit_widget(key, "y", self.disp_widg[key].y)   
+
         if self.widget_manager.root_update_required:
             # Redraw the root window
             new_width = self.widget_manager.root[2]
@@ -615,9 +614,15 @@ class menu_ui:
         btn_exp.config(image = imgs[3])        
         
     def __new(self):
-        print(self.widget_manager.root)
-        print(self.widget_manager.widgets)
-        
+        if messagebox.askyesno("New Project", "Starting a new project will clear everything you have not saved.\nAre you sure you want to start a new project?"):
+            self.widget_manager.root = ["tk.Tk", "root", defaults.ROOT_WIDTH, defaults.ROOT_HEIGHT, [], [defaults.root_methods()], []]
+            self.widget_manager.widgets = []
+            self.widget_manager.location = {}
+            self.widget_manager.root_update_required = True
+            
+            self.display_ui.refresh()
+            self.selection_ui.revert()
+
     def __load(self):
         load_path = filedialog.askopenfilename(initialdir = "./", title = "Select a file...", filetypes = (("tkEditor Files","*.tkw"),))
         valid = False
