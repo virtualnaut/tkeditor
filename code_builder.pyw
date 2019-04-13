@@ -31,7 +31,7 @@ def widget_translate(data):
 
         # Put in the properties as arguments to the widget's constructor
         for widget_property in widget[5]:
-            instantiation += ", " + widget_property
+            instantiation += ", " + gt.quote_escape(widget_property)
 
         instantiation += ")\n"
 
@@ -42,8 +42,8 @@ def widget_translate(data):
         # --Translate the widget's called methods--
         methods = ""
         
-        for method in widget[6]:
-            methods += widget[1] + "." + method + "\n\n"
+        for method in widget[6][0].keys():
+            methods += widget[1] + "." + method + "(" + widget[6][0][method] + ")\n\n"
 
         # --Translate the widget's bindings--
         bindings = ""

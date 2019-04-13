@@ -214,18 +214,21 @@ def prompt_type(prop, additional):
             return {"window_type":"Single",
                     "title":"Width",
                     "message":"Please specify a width:",
+                    "single_type":"int",
                     "single_preload":additional}
         
         elif prop == "height":
             return {"window_type":"Single",
                     "title":"Height",
                     "message":"Please specify a height:",
+                    "single_type":"int",
                     "single_preload":additional}
         
         elif prop == "text":
             return {"window_type":"Single",
                     "title":"Text",
                     "message":"Please specify some text:",
+                    "single_type":"string",
                     "single_preload":additional}
         
         elif prop == "image":
@@ -270,13 +273,13 @@ def prompt_type(prop, additional):
                     "message":"The justification of the text:",
                     "combo_values":["left", "right", "center"],
                     "combo_preload":additional}
-        
-        
 
 def property_strip(prop):
+    
     for char in range(len(prop)):
         if prop[char] == "=":
             return prop[:char]
+            
 
 def property_find(properties, find):
     # Remove spaces from everything
@@ -405,6 +408,28 @@ def bool_list_parse(string):
         return listified
     else:
         return string
+
+def quote_escape(prop):
+    string_properties = ["text"]
+    
+    value = prop[locate(prop, "=") + 1:]
+    if value[0] == " ":
+        value = value[1:]
+        
+    escaped = ""
+    if property_strip(prop.replace(" ","")) in string_properties:
+        for char in range(len(value)):
+            current = value[char]
+            if ((char != 0) and (char != len(value) - 1)) and (current == "\""):
+                current = "\\\""
+            escaped += current
+            
+        return property_strip(prop.replace(" ", "")) + " = " + escaped
+    else:
+        return prop
+                
+        
+#print(quote_escape("text = \"thisiss\"ometext\""))
 
 #print(noneify([1,2,3,4], [['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))
 #print(remove_unused([['ttk.Button', '$NULL$', 'root', 'x=127', 'y=52', ['width = $NULL$', 'text = "Button"'], [], []], ['ttk.Button', 'widget_1', 'root', 'x=67', 'y=117', ['width = $NULL$', 'text = "Button"'], [], []]]))

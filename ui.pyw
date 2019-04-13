@@ -370,17 +370,17 @@ class selection_ui:
 
                 # Changing X Coord
                 if selected == "X-Coord":
-                    prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:", default_value = 0,
+                    prompt = prompt_ui("Single", "X Coordinate", "Please enter a value:", default_value = 0, single_type = "integer",
                                        single_preload = self.widgets.widgets[self.widgets.location[self.displaying]][3].replace(" ","")[2:])
 
                 # Changing Y Coord
                 elif selected == "Y-Coord":
-                    prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:", default_value = 0,
+                    prompt = prompt_ui("Single", "Y Coordinate", "Please enter a value:", default_value = 0, single_type = "integer",
                                        single_preload = self.widgets.widgets[self.widgets.location[self.displaying]][4].replace(" ","")[2:])
 
                 # Changing Identifier
                 elif selected == "Identifier":
-                    prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:",
+                    prompt = prompt_ui("Single", "Identifier", "Please enter a new identifier:", single_type = "raw",
                                        default_value = self.widgets.widgets[self.widgets.location[self.displaying]][1],
                                        single_preload = self.widgets.widgets[self.widgets.location[self.displaying]][1])
 
@@ -628,6 +628,7 @@ class menu_ui:
 # This will be used to prompt user for text data.
 class prompt_ui():
     def __init__(self, window_type, title, message, default_value = "$NULL$",
+                 single_type = None,
                  tuple_elements = 2, tuple_labels = None, tuple_bool = False,
                  combo_values = [],
                  single_preload = None, tuple_preload = (), list_preload = [], combo_preload = None, checkbox_preload = None):
@@ -637,6 +638,7 @@ class prompt_ui():
         allowed_types = ["Single", "Tuple", "Dropdown", "Explorer", "List", "Checkbox"]
         self.window_type = window_type
         self.result = None
+        self.single_type = single_type
         
         if window_type in allowed_types:
             # Master window
@@ -869,6 +871,10 @@ class prompt_ui():
         self.root.grab_release()
         if self.window_type == "Single":
             value = self.input.get()
+            
+            if self.single_type == "string":
+                value = "\"" + value + "\""
+            
             self.root.quit()
             self.root.destroy()
             self.result = [True, value]
