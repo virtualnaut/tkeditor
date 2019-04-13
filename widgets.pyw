@@ -75,14 +75,6 @@ class mButton(ttk.Button):
         self.prop_dict = kwargs
         self.x = 0
         self.y = 0
-
-        """
-        # Styling
-        self.__select_style = ttk.Style()
-        self.__select_style.configure("Selected.TButton", background = "orange")
-        self.style_name = "TButton"
-        self.selected_style_name = "Selected.TButton"
-        """
         
         # Raise an error if an invalid keyword is given
         self.__kwarg_validate(kwargs)

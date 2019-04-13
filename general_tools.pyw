@@ -155,55 +155,6 @@ def keyword_convert(properties):
         keywords[key] = val
 
     return keywords
-
-"""
-def prompt_type_OLD(prop, additional):
-    valid_props = ["width", "height", "text", "image", "cursor",
-                   "takefocus", "values", "justify"]
-
-    if prop in valid_props:
-        if prop == "width":
-            return ["Single", "Width", "Please specify a width:"]
-        
-        elif prop == "height":
-            return ["Single", "Height", "Please specify a height:"]
-        
-        elif prop == "text":
-            return ["Single", "Text", "Please specify text:"]
-        
-        elif prop == "image":
-            return ["Explorer"]
-        
-        elif prop == "cursor":
-            return ["Dropdown", "Cursor" , "Please select a cursor to be displayed:",
-                    ["arrow", "based_arrow_down", "based_arrow_up", "boat", "bogosity",
-                     "bottom_left_corner", "bottom_right_corner", "bottom_side", "bottom_tee",
-                     "box_spiral", "center_ptr", "circle", "clock", "coffee_mug", "cross",
-                     "cross_reverse", "crosshair", "diamond_cross", "dot", "dotbox",
-                     "double_arrow", "draft_large", "draft_small", "draped_box", "exchange",
-                     "fleur", "gobbler", "gumby", "hand1", "hand2", "heart", "icon",
-                     "iron_cross", "left_ptr", "left_side", "left_tee", "leftbutton",
-                     "ll_angle", "lr_angle", "man", "middlebutton", "mouse", "pencil",
-                     "pirate", "plus", "question_arrow", "right_ptr", "right_side",
-                     "right_tee", "rightbutton", "rtl_logo", "sailboat", "sb_down_arrow",
-                     "sb_h_double_arrow", "sb_left_arrow", "sb_right_arrow", "sb_up_arrow",
-                     "sb_v_double_arrow", "shuttle", "sizing", "spider", "spraycan", "star",
-                     "target", "tcross", "top_left_arrow", "top_left_corner", "top_right_corner",
-                     "top_side", "top_tee", "trek", "ul_angle", "umbrella", "ur_angle", "watch",
-                     "xterm", "X_cursor"]]
-        
-        elif prop == "takefocus":
-            return ["Bool"]
-        
-        elif prop == "values":
-            return ["List"]
-        
-        elif prop == "justify":
-            return ["Dropdown", "Justify", "Please specify the justification", ["left", "right", "center"]]
-
-    else:
-        raise ValueError("Please specify a valid property.")
-"""
     
 def prompt_type(prop, additional):
     valid_props = ["width", "height", "text", "image", "cursor",
@@ -299,21 +250,46 @@ def property_find(properties, find):
     # Get the index
     return locate(stripped, find)
     
-def coord_validate(x, y, window_width, window_height):
+def coord_validate(x, y, window_width, window_height, buffer = 5, negative_check = False, widg_height = None, widg_width = None):
     # This function determines whether a widget will be moved off the window and proposes a new location.
     # Allow minimum of 5 by 5px of the widget to be onscreen.
+    
+    if (type(x) == str) and (type(y) == str): 
+        x = x.replace(" ", "")
+        y = y.replace(" ", "")
+        
+        if x[1] == "=":
+            x = x[2:]
+        
+        if y[1] == "=":
+            y = y[2:]
+            
+        x = int(x)
+        y = int(y)
+        
+    window_width = int(window_width)
+    window_height = int(window_height)
     
     new = [x, y]
     
     err = False
-    if x > window_width - 5:
+    if x > window_width - buffer:
         err = True
         new[0] = window_width - 10
         
-    if y > window_height - 5:
+    if y > window_height - buffer:
         err = True
         new[1] = window_height - 10
+    
+    if negative_check:
+        if x + widg_width <= 1:
+            err = True
+            new[0] = 10 - widg_width
         
+        if y + widg_height <= 1:
+            err = True
+            new[1] = 10 - widg_height
+            
     return [err, new]
     
 def remove_unused(widgets):

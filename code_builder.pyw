@@ -10,7 +10,7 @@ def generate_template(proj_name, proj_comments, proj_author, identifiers, data):
 
     # --Generate comments for the top of the file--
     content += "# " + proj_name
-    content += "# " + gt.short_date + "/n"
+    content += "# " + gt.short_date() + "/n"
     content += "# " + proj_author + "/n"
     content += "# Generated with tkEditor\n\n"
 
@@ -70,8 +70,11 @@ def root_translate(data):
 
     # --Translate the methods--
     methods = identifier + ".geometry('" + str(data[2]) + "x" + str(data[3]) + "')\n"
+    
     for method in data[5][0].keys():
+        print(gt.method_assemble(identifier, method, data[5][0][method]) + "\n")
         methods += gt.method_assemble(identifier, method, data[5][0][method]) + "\n"
+        
     """
     # --Translate the bindings--
     bindings = ""
@@ -87,6 +90,7 @@ def root_translate(data):
 
     translated = instantiation + methods + bindings + protocols + "\n"
     """
+    
     translated = instantiation + methods + "\n"
     return translated
     
@@ -120,6 +124,23 @@ def generate_class(class_ident, root_data, widg_data):
     class_text += i + i + root_identifier + ".mainloop()"
 
     return class_text
+
+def python_build(proj_name, root, widgets):
+    content = ""
+
+    # --Generate comments for the top of the file--
+    content += "# " + proj_name + "\n"
+    content += "# " + gt.short_date() + "\n"
+    content += "# Generated with tkEditor\n\n"
+
+    content += "import tkinter as tk\n"
+    content += "from tkinter import ttk\n\n"
+    
+    content += generate_class("ui", root, widgets)
+    
+    content += "\n\nx = ui()"
+    
+    return content
 
 #print(generate_class("tester",["tk.Tk", "root", [], ["<Button-1>, dummyI"], ["\"WM_DELETE_WINDOW\", dummyII"]], ))
 """

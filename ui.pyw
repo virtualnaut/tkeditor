@@ -75,8 +75,8 @@ class display_window:
             for method in self.widget_manager.root[5][0].keys():
                 if method == "title":
                     self.root.title(self.widget_manager.root[5][0][method])
-                elif method == "resizable":
-                    self.root.resizable(*gt.bool_list_parse(self.widget_manager.root[5][0][method]))
+                #elif method == "resizable":
+                #    self.root.resizable(*gt.bool_list_parse(self.widget_manager.root[5][0][method]))
                  
             self.root.geometry(str(new_width) + "x" + str(new_height))
             self.widget_manager.root_update_required = False
@@ -99,14 +99,34 @@ class display_window:
                 
         else:
             # User has selected a widget
+            
             for key in self.disp_widg.keys():
                 if event.widget == self.disp_widg[key].movement.inner:
                     self.selection_ui.set_display(key)
 
     def __coord_upd(self, event):
         for ident in self.disp_widg.keys():
-            self.widget_manager.edit_widget(ident, "x", self.disp_widg[ident].x)
-            self.widget_manager.edit_widget(ident, "y", self.disp_widg[ident].y)
+            
+            validation_result = gt.coord_validate(self.disp_widg[ident].x, self.disp_widg[ident].y, self.widget_manager.root[2], self.widget_manager.root[3], buffer = 2, negative_check = True, widg_width = self.disp_widg[ident].winfo_width(), widg_height = self.disp_widg[ident].winfo_height())
+            
+            if validation_result[0] == True:
+                x_val = validation_result[1][0]
+                y_val = validation_result[1][1]
+                
+                self.widget_manager.edit_widget(ident, "x", x_val)
+                self.widget_manager.edit_widget(ident, "y", y_val)
+                
+                self.disp_widg[ident].x = x_val
+                self.disp_widg[ident].y = y_val
+                
+                self.refresh()
+                self.selection_ui.set_display(ident)                   
+            else:
+                x_val = self.disp_widg[ident].x
+                y_val = self.disp_widg[ident].y
+                                
+                self.widget_manager.edit_widget(ident, "x", x_val)
+                self.widget_manager.edit_widget(ident, "y", y_val)
 
         if event.widget != self.effect_canv:
             for key in self.disp_widg.keys():
@@ -398,7 +418,7 @@ class selection_ui:
                 elif selected == "title":
                     prompt = prompt_ui("Single", "Window Title", "Please enter a window title:", default_value = "tk", single_preload = self.widgets.root[5][0]["title"])
                 elif selected == "resizable":
-                    prompt = prompt_ui("Tuple", "Resizable", "Please enter true or false:", default_value = [False, False],
+                    prompt = prompt_ui("Tuple", "Resizable", "Directions the window can be resized in:", default_value = [False, False],
                                        tuple_elements = 2, tuple_labels = ["x", "y"], tuple_bool = True, tuple_preload = self.widgets.root[5][0]["resizable"])
                 
         value = prompt.result
@@ -416,10 +436,24 @@ class selection_ui:
                         self.displaying = value[1]
                         
                     elif selected == "X-Coord":
+                        
+                        validation_result = gt.coord_validate(value[1], self.widgets.widgets[self.widgets.location[self.displaying]][4], self.widgets.root[2], self.widgets.root[3])
+                        
+                        if validation_result[0] == True:
+                            if messagebox.askyesno("Move Widget?", "The move you are trying to perform will result in the widget being moved out of the window.\nThe widget will be moved to a position inside the window.\n\nAre you sure you want to continue?"):
+                                value[1] = validation_result[1][0]
+                                
                         self.widgets.edit_widget(self.displaying, "x", value[1])
                         self.display_ui.disp_widg[self.displaying].x = int(value[1])
 
                     elif selected == "Y-Coord":
+                        
+                        validation_result = gt.coord_validate(self.widgets.widgets[self.widgets.location[self.displaying]][3], value[1], self.widgets.root[2], self.widgets.root[3])
+                        
+                        if validation_result[0] == True:
+                            if messagebox.askyesno("Move Widget?", "The move you are trying to perform will result in the widget being moved out of the window.\nThe widget will be moved to a position inside the window.\n\nAre you sure you want to continue?"):
+                                value[1] = validation_result[1][1]                        
+                        
                         self.widgets.edit_widget(self.displaying, "y", value[1])
                         self.display_ui.disp_widg[self.displaying].y = int(value[1])
 
@@ -585,7 +619,7 @@ class menu_ui:
         print(self.widget_manager.widgets)
         
     def __load(self):
-        load_path = filedialog.askopenfilename(initialdir = "./", title = "Select a file", filetypes = (("tkEditor Files","*.tkw"),))
+        load_path = filedialog.askopenfilename(initialdir = "./", title = "Select a file...", filetypes = (("tkEditor Files","*.tkw"),))
         valid = False
         if load_path != "":
             try:
@@ -609,7 +643,7 @@ class menu_ui:
         root = self.widget_manager.root
         widgets = self.widget_manager.widgets
         
-        save_path = filedialog.asksaveasfilename(initialdir = "./", title = "Save as", filetypes = (("tkEditor Files","*.tkw"),))
+        save_path = filedialog.asksaveasfilename(initialdir = "./", title = "Save as...", filetypes = (("tkEditor Files","*.tkw"),))
         if save_path[-4:] != ".tkw":
             save_path += ".tkw"
             
@@ -617,13 +651,25 @@ class menu_ui:
         
         
     def __export(self):
-        prepped = [self.widget_manager.root, gt.remove_unused(self.widget_manager.widgets)]
-        TEMPPATH = "./output/proto.py"
-        py_stream = open(TEMPPATH, "w+")
-        py_stream.write(cb.generate_class("ui", prepped[0], prepped[1]))
-        py_stream.close()
+
+        root = self.widget_manager.root
+        widgets = gt.remove_unused(self.widget_manager.widgets)
         
-    
+        export_path = filedialog.asksaveasfilename(initialdir = "./", title = "Export as...", filetypes = (("Python Files (no console)", "*.pyw"),))
+        if export_path[-4:] != ".pyw":
+            if export_path[-3:] != ".py":
+                export_path += ".pyw"
+                name = export_path.split("/")[-1][:-4]
+            else:
+                name = export_path.split("/")[-1][:-3]
+        else:
+            name = export_path.split("/")[-1][:-4]
+            
+        code = cb.python_build(name, root, widgets)
+        
+        file = open(export_path, "w+")
+        file.write(code)
+        file.close()
 
 # This will be used to prompt user for text data.
 class prompt_ui():

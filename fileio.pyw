@@ -1,3 +1,6 @@
+
+import general_tools as gt
+
 def clean(data):
     # This function replaces nulls with nothing, as nulls will be used in the file for delimiting.
     return str(data).replace("\0","")
@@ -90,6 +93,8 @@ def load_data(path):
     for ii in range(len(c[0][1][0][1:])):
         if ii % 2 == 1:
             root[5][0][c[0][1][0][ii]] = c[0][1][0][ii + 1]
+            
+    root[5][0] = gt.type_fix(root[5][0])
 
     del c[0][:3]
     
