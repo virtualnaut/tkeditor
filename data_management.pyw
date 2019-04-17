@@ -1,6 +1,6 @@
 import general_tools as gt
 import code_builder as cb
-import defaults
+import defaults, keyword
 
 class IdentifierUsed(Exception):
     pass
@@ -97,7 +97,33 @@ class data_manager:
 
         # Update the actual data
         self.widgets[self.location[new_identifier]][1] = new_identifier
-
+        
+    def validate_identifier(self, identifier):
+        digits = ["0","1","2","3","4","5","6","7","8","9"]
+        alphabet = []
+        for ii in range(ord("a"), ord("z")):
+            alphabet += [chr(ii)]
+            
+        valid_chars = digits + alphabet + ["_"]
+        
+        if (identifier in self.location.keys()) or (identifier == "$ROOT$") :
+            return [False, 0]
+        
+        if keyword.iskeyword(identifier):
+            return [False, 1]
+        
+        if identifier == "":
+            return [False, 4]        
+        
+        if identifier[0] in digits:
+            return [False, 2]
+        
+        for char in identifier:
+            if char not in valid_chars:
+                return [False, 3]
+            
+        return [True]
+    
     def __data_verif(self, part, value):
         # Verify the data and fix minor errors
         orig = value
