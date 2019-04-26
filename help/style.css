@@ -1,0 +1,29 @@
+h1, a, h2, h3, th
+{
+    font-family: "Lucida Console";
+}
+
+p, td, li:not(#a)
+{
+    font-size: 10pt;
+    font-family: "Lucida Console";
+}
+
+th
+{background-color: #aaaaaa;}
+
+td
+{
+    background-color: #eeeeee;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#props
+{width: 150px;}
+
+#descs
+{width: 300px;}
+
+#types
+{width: 150px;}

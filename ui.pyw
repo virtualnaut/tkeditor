@@ -10,6 +10,7 @@ import general_tools as gt
 import defaults
 import code_builder as cb
 import fileio
+import webbrowser, os
 
 # The window where widget arrangement etc. happens
 class display_window:
@@ -59,6 +60,9 @@ class display_window:
             # Put the widget in the correct place, removing the "x=" part and any spaces
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
+            
+            if self.selection_ui.displaying == widget[1]:
+                self.disp_widg[widget[1]].movement.select_effect()
 
         # Update coords
         for key in self.disp_widg.keys():
@@ -527,7 +531,8 @@ class menu_ui:
         
         # Set Up Window
         self.root = tk.Toplevel()
-        self.root.geometry("369x100")
+        self.root.geometry("461x100")
+        self.root.resizable(False, False)
         self.root.title("Menu")
         self.root.iconbitmap("./resources/icon.ico")
         
@@ -536,7 +541,8 @@ class menu_ui:
         imgs = [tk.PhotoImage(file="./resources/new_file.png"),
                 tk.PhotoImage(file="./resources/load_file.png"),
                 tk.PhotoImage(file="./resources/save_file.png"),
-                tk.PhotoImage(file="./resources/export_file.png")]
+                tk.PhotoImage(file="./resources/export_file.png"),
+                tk.PhotoImage(file="./resources/help.png")]
                 
         bg_unhov = tk.PhotoImage(file = "./resources/bg_unhov.png")
         bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
@@ -613,6 +619,24 @@ class menu_ui:
         
         btn_exp.config(image = imgs[3])        
         
+        # Help Pages
+        bg_hlp = ttk.Label(self.root)
+        btn_hlp = ttk.Label(self.root)
+        
+        bg_hlp.image = bg_unhov
+        btn_hlp.image = imgs[4]
+        
+        bg_hlp.config(image = bg_unhov)
+        
+        bg_hlp.place(x=370,y=10)
+        btn_hlp.place(x=374,y=14)
+        
+        btn_hlp.bind("<Enter>", lambda event: bg_hlp.config(image = bg_hov))
+        btn_hlp.bind("<Leave>", lambda event: bg_hlp.config(image = bg_unhov))
+        btn_hlp.bind("<Button-1>", lambda event: self.__help())
+        
+        btn_hlp.config(image = imgs[4])               
+        
     def __new(self):
         if messagebox.askyesno("New Project", "Starting a new project will clear everything you have not saved.\nAre you sure you want to start a new project?"):
             self.widget_manager.root = ["tk.Tk", "root", defaults.ROOT_WIDTH, defaults.ROOT_HEIGHT, [], [defaults.root_methods()], []]
@@ -675,6 +699,15 @@ class menu_ui:
         file = open(export_path, "w+")
         file.write(code)
         file.close()
+        
+    def __help(self):
+        if os.path.exists("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"):
+            webbrowser.get("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe %s").open(os.path.abspath("./help/contents.html"))
+        else:
+            try:
+                webbrowser.open(os.path.abspath("./help/contents.html"))
+            except:
+                messagebox.showerror("Couldn't Open Help", "Open '" + os.path.abspath("./help/contents.html") + "' to see the help pages.")
 
 # This will be used to prompt user for text data.
 class prompt_ui():

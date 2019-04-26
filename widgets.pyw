@@ -16,7 +16,7 @@ class mobiliser:
         # Set up bindings
         self.inner.bind("<B1-Motion>", lambda event: self.__drag())
         self.inner.bind("<ButtonPress-1>", self.__grab)
-        self.inner.bind("<ButtonRelease-1>", lambda event: self.__select_effect())
+        self.inner.bind("<ButtonRelease-1>", lambda event: self.select_effect())
 
         if self.double_clk:
             self.inner.bind("<Double-Button-1>", lambda event: self.enable())
@@ -47,7 +47,7 @@ class mobiliser:
     
     def select(self):
         # Select the widget and display selection effect
-        self.__select_effect()
+        self.select_effect()
         self.selected = True
 
     def deselect(self):
@@ -59,7 +59,7 @@ class mobiliser:
         if self.double_clk:
             self.inner.state(["disabled"])
 
-    def __select_effect(self):
+    def select_effect(self):
         self.effects.delete("all")
         self.effects.create_rectangle(self.inner.x-4, self.inner.y-4,
                                      (self.inner.x + self.inner.winfo_reqwidth()+4),
