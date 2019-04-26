@@ -36,6 +36,11 @@ class display_window:
         # Set up deselection
         self.root.bind("<Button-1>", self.__possible_selection)
         self.root.bind("<ButtonRelease-1>", self.__coord_upd)
+        
+        self.root.bind("<Up>", lambda event: self.__arrow_move("u"))
+        self.root.bind("<Down>", lambda event: self.__arrow_move("d"))
+        self.root.bind("<Left>", lambda event: self.__arrow_move("l"))
+        self.root.bind("<Right>", lambda event: self.__arrow_move("r"))
 
         # Canvas where selection boxes etc will appear
         self.effect_canv = tk.Canvas(self.root, width = 500, height = 400)
@@ -139,6 +144,53 @@ class display_window:
     def selection_box_fix(self, identifier):
         self.disp_widg[identifier].movement.deselect()
         self.disp_widg[identifier].movement.select()
+        
+    def __arrow_move(self, direction):
+        
+        widget = self.selection_ui.displaying
+        
+        if (widget != "$ROOT$") and (widget != None):
+            
+            raw_x = self.disp_widg[widget].x
+            raw_y = self.disp_widg[widget].y
+            
+            if direction == "u":
+                raw_y -= 1
+            elif direction == "d":
+                raw_y += 1
+            elif direction == "l":
+                raw_x -= 1
+            elif direction == "r":
+                raw_x += 1
+            
+            validation_result = gt.coord_validate(raw_x, raw_y, self.widget_manager.root[2], self.widget_manager.root[3], buffer = 2, negative_check = True, widg_width = self.disp_widg[widget].winfo_width(), widg_height = self.disp_widg[widget].winfo_height())
+
+            if validation_result[0] == True:
+                
+                x_val = validation_result[1][0]
+                y_val = validation_result[1][1]
+            
+                self.widget_manager.edit_widget(widget, "x", x_val)
+                self.widget_manager.edit_widget(widget, "y", y_val)
+            
+                self.disp_widg[widget].x = x_val
+                self.disp_widg[widget].y = y_val
+            
+            else:
+                x_val = raw_x
+                y_val = raw_y
+        
+                self.widget_manager.edit_widget(widget, "x", x_val)
+                self.widget_manager.edit_widget(widget, "y", y_val)
+        
+            # Update the display
+            self.refresh()
+            
+            # Update the selection ui
+            self.selection_ui.set_display(widget)
+            
+            # Reselect the widget to update the selection box
+            self.disp_widg[widget].movement.select()
 
 # The widget explorer
 class tree_ui:
@@ -430,14 +482,29 @@ class selection_ui:
             if value[0] != False:
                 if self.displaying != "$ROOT$":
                     if selected == "Identifier":
-                        # Update subtitle
-                        self.sub.config(text = str(value[1]))
-
-                        # Update data
-                        self.widgets.change_identifier(self.displaying, value[1])
-                        self.display_ui.change_identifier(self.displaying, value[1])
-                        self.displaying = value[1]
                         
+                        validation = self.widgets.validate_identifier(str(value[1]))
+                        
+                        if validation[0]:
+                            # Update subtitle
+                            self.sub.config(text = str(value[1]))
+    
+                            # Update data
+                            self.widgets.change_identifier(self.displaying, value[1])
+                            self.display_ui.change_identifier(self.displaying, value[1])
+                            self.displaying = value[1]
+                        else:
+                            if validation[1] == 0:
+                                messagebox.showerror("Identifier Error", "The identifier you specified is already used.\nThe identifier has been reverted to its original value.")
+                            elif validation[1] == 1:
+                                messagebox.showerror("Identifier Error", "The identifier you specified is a Python keyword.\nThe identifier has been reverted to its original value.")
+                            elif validation[1] == 2:
+                                messagebox.showerror("Identifier Error", "The identifier you specified begins with a digit.\nThe identifier has been reverted to its original value.")
+                            elif validation[1] == 3:
+                                messagebox.showerror("Identifier Error", "The identifier you specified contains invalid characters.\nThe identifier has been reverted to its original value.")
+                            elif validation[1] == 4:
+                                messagebox.showerror("Identifier Error", "The identifier you specified is empty.\nThe identifier has been reverted to its original value.")
+                                
                     elif selected == "X-Coord":
                         
                         validation_result = gt.coord_validate(value[1], self.widgets.widgets[self.widgets.location[self.displaying]][4], self.widgets.root[2], self.widgets.root[3])
