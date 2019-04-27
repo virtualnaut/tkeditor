@@ -25,13 +25,21 @@ def widget_translate(data):
     translated = []
     
     for widget in data:
+        # Store a reference if the widget has an image
+        image = ""
+        if "image" in gt.keyword_convert(widget[5]).keys():
+            image += widget[2] + "." + widget[1] + "_img = " + gt.keyword_convert(widget[5])["image"] + "\n"
+        
         # --Translate the widget's instantiation--
         # Assign to a variable
         instantiation = widget[1] + " = " + widget[0] + "(" + widget[2]
 
         # Put in the properties as arguments to the widget's constructor
         for widget_property in widget[5]:
-            instantiation += ", " + gt.quote_escape(widget_property)
+            if not widget_property.replace(" ","").startswith("image="):
+                instantiation += ", " + gt.quote_escape(widget_property)
+            else:
+                instantiation += ", image = " + widget[2] + "." + widget[1] + "_img"
 
         instantiation += ")\n"
 
@@ -51,7 +59,7 @@ def widget_translate(data):
         for binding in widget[7]:
             bindings += widget[1] + ".bind(" + binding + ")\n"
 
-        total = instantiation + place + methods + bindings
+        total = image + instantiation + place + methods + bindings
 
         translated += [total]
     return translated
@@ -72,7 +80,6 @@ def root_translate(data):
     methods = identifier + ".geometry('" + str(data[2]) + "x" + str(data[3]) + "')\n"
     
     for method in data[5][0].keys():
-        print(gt.method_assemble(identifier, method, data[5][0][method]) + "\n")
         methods += gt.method_assemble(identifier, method, data[5][0][method]) + "\n"
         
     """

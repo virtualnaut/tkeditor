@@ -11,6 +11,7 @@ class PropertyError(Exception):
 class data_manager:
     def __init__(self, win_type, root_identifier):
         self.widgets = []
+        self.images = {}
 
         # Dictionary of index in self.widgets where a certain widget is stored
         # identifier : index

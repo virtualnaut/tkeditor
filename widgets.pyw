@@ -174,6 +174,39 @@ class mCombobox(ttk.Combobox):
         self.y = y
         super().place(x = x, y = y)
 
+class mLabel(ttk.Label):
+    def __init__(self, parent, effects, **kwargs):
+        # Properties
+        self.prop_dict = kwargs
+        self.x = 0
+        self.y = 0
+        
+        # Raise an error if an invalid keyword is given
+        self.__kwarg_validate(kwargs)
+
+        # Call ttk constructor for this widget
+        super().__init__(parent, **kwargs)
+
+        # Set up bindings and their commands
+        self.movement = mobiliser(self, effects)
+
+    def __kwarg_validate(self, values):
+        # If one of the arguments' keywords is not in 'valid', raise TypeError
+        valid = ["width", "text", "image", "cursor", "justify"]
+        for arg in values.keys():
+            if arg not in valid:
+                raise TypeError("Invalid keyword argument: "+arg)
+
+    def config(self, **kwargs):
+        self.__kwarg_validate(kwargs)
+        self.prop_dict.update(kwargs)
+        super().config(**kwargs)
+
+    def place(self, x, y):
+        self.x = x
+        self.y = y
+        super().place(x = x, y = y)
+
 def movable(widget_type, parent, effects, **kwargs):
     if widget_type == "ttk.Button":
         return mButton(parent, effects, **kwargs)
@@ -181,6 +214,8 @@ def movable(widget_type, parent, effects, **kwargs):
         return mCheckbutton(parent, effects, **kwargs)
     if widget_type == "ttk.Combobox":
         return mCombobox(parent, effects, **kwargs)
+    if widget_type == "ttk.Label":
+        return mLabel(parent, effects, **kwargs)
 
 def debug():
     r=tk.Tk()

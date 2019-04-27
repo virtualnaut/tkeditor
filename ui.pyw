@@ -57,10 +57,11 @@ class display_window:
         self.disp_widg = {}
         
         for widget in self.widget_manager.widgets:
+            keyworded = gt.keyword_convert(widget[5])
 
             # Instantiate the widget
             self.disp_widg[widget[1]] = widg.movable(widget[0], self.root, self.effect_canv,
-                                                     **gt.type_fix(gt.keyword_convert(widget[5])))
+                                                     **gt.image_remove(gt.type_fix(keyworded)))
 
             # Put the widget in the correct place, removing the "x=" part and any spaces
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
@@ -68,6 +69,13 @@ class display_window:
             
             if self.selection_ui.displaying == widget[1]:
                 self.disp_widg[widget[1]].movement.select_effect()
+                
+            if "image" in keyworded.keys():
+                # Keep image reference
+                if keyworded["image"] != None:
+                    self.widget_manager.images[widget[1]] = gt.image_unstring(keyworded["image"])
+                    
+                    self.disp_widg[widget[1]].config(image = self.widget_manager.images[widget[1]])
 
         # Update coords
         for key in self.disp_widg.keys():
@@ -281,7 +289,7 @@ class add_ui:
         btns = []
 
         order = ["ttk.Button", "ttk.Checkbutton", "ttk.Combobox", "ttk.Entry",
-                 "ttk.Frame", "tk.Label", "tk.LabelFrame", "ttk.ProgressBar",
+                 "ttk.Frame", "ttk.Label", "tk.LabelFrame", "ttk.ProgressBar",
                  "ttk.Radiobutton", "ttk.Scale", "ttk.Separator",
                  "ttk.Treeview", "tk.Canvas", "tk.Listbox", "tk.Message",
                  "tk.OptionMenu", "tk.Spinbox", "tk.Text"]
@@ -477,7 +485,6 @@ class selection_ui:
                                        tuple_elements = 2, tuple_labels = ["x", "y"], tuple_bool = True, tuple_preload = self.widgets.root[5][0]["resizable"])
                 
         value = prompt.result
-
         if value != None:
             if value[0] != False:
                 if self.displaying != "$ROOT$":
@@ -526,8 +533,8 @@ class selection_ui:
                         
                         self.widgets.edit_widget(self.displaying, "y", value[1])
                         self.display_ui.disp_widg[self.displaying].y = int(value[1])
-
-                    else:
+                        
+                    else:  
                         self.widgets.edit_widget(self.displaying, "properties", [(selected + " = " + str(value[1]))])
                 else:
                     self.widgets.root_update_required = True
@@ -724,26 +731,27 @@ class menu_ui:
             except:
                 messagebox.showerror("Error Loading File", "The selected file may be invalid.\nFile loading aborted.")
         
-        if not messagebox.askyesno("Load File", "Are you sure you want to load another file? Your current project will\nbe lost."):
-            valid = False
-            
-        if valid:
-            self.widget_manager.root = loaded[0]
-            self.widget_manager.widgets = loaded[1]
-            self.widget_manager.location = loaded[2]
-            self.widget_manager.root_update_required = True
-            self.display_ui.refresh()
-            self.selection_ui.revert()
+            if not messagebox.askyesno("Load File", "Are you sure you want to load another file? Your current project will\nbe lost."):
+                valid = False
+                
+            if valid:
+                self.widget_manager.root = loaded[0]
+                self.widget_manager.widgets = loaded[1]
+                self.widget_manager.location = loaded[2]
+                self.widget_manager.root_update_required = True
+                self.display_ui.refresh()
+                self.selection_ui.revert()
         
     def __save(self):
         root = self.widget_manager.root
         widgets = self.widget_manager.widgets
         
         save_path = filedialog.asksaveasfilename(initialdir = "./", title = "Save as...", filetypes = (("tkEditor Files","*.tkw"),))
-        if save_path[-4:] != ".tkw":
-            save_path += ".tkw"
-            
-        fileio.save_data(save_path, root, widgets)
+        if save_path != "":
+            if save_path[-4:] != ".tkw":
+                save_path += ".tkw"
+                
+            fileio.save_data(save_path, root, widgets)
         
         
     def __export(self):
@@ -752,20 +760,22 @@ class menu_ui:
         widgets = gt.remove_unused(self.widget_manager.widgets)
         
         export_path = filedialog.asksaveasfilename(initialdir = "./", title = "Export as...", filetypes = (("Python Files (no console)", "*.pyw"),))
-        if export_path[-4:] != ".pyw":
-            if export_path[-3:] != ".py":
-                export_path += ".pyw"
-                name = export_path.split("/")[-1][:-4]
-            else:
-                name = export_path.split("/")[-1][:-3]
-        else:
-            name = export_path.split("/")[-1][:-4]
-            
-        code = cb.python_build(name, root, widgets)
         
-        file = open(export_path, "w+")
-        file.write(code)
-        file.close()
+        if export_path != "":
+            if export_path[-4:] != ".pyw":
+                if export_path[-3:] != ".py":
+                    export_path += ".pyw"
+                    name = export_path.split("/")[-1][:-4]
+                else:
+                    name = export_path.split("/")[-1][:-3]
+            else:
+                name = export_path.split("/")[-1][:-4]
+                
+            code = cb.python_build(name, root, widgets)
+            
+            file = open(export_path, "w+")
+            file.write(code)
+            file.close()
         
     def __help(self):
         if os.path.exists("C:/Program Files (x86)/Google/Chrome/Application/chrome.exe"):
@@ -793,11 +803,12 @@ class prompt_ui():
         
         if window_type in allowed_types:
             # Master window
-            self.root = tk.Toplevel()
-            self.root.resizable(False, False)
-            self.root.grab_set()
-            self.root.protocol("WM_DELETE_WINDOW", self.__cancel)
-            self.root.iconbitmap("./resources/icon.ico")
+            if window_type != "Explorer":
+                self.root = tk.Toplevel()
+                self.root.resizable(False, False)
+                self.root.grab_set()
+                self.root.protocol("WM_DELETE_WINDOW", self.__cancel)
+                self.root.iconbitmap("./resources/icon.ico")
 
             # A window for entering a single value e.g. string for text, or a number for coords
             if window_type == "Single":
@@ -832,7 +843,6 @@ class prompt_ui():
 
             elif window_type == "Explorer":
                 self.result = [True,"tk.PhotoImage(file='"+filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))+"')"]
-            
             elif (window_type == "Tuple") or (window_type == "Checkbox"):
                 if window_type == "Checkbox":
                     tuple_elements = 1
@@ -1011,8 +1021,8 @@ class prompt_ui():
                 self.root.bind("<Escape>", lambda event: self.__cancel())   
                 #self.root.bind("<Button-1>", click_out)
                 
-                
-            self.root.mainloop()
+            if window_type != "Explorer":
+                self.root.mainloop()
         else:
             raise ValueError("Please specify a valid type of window.")
         # Set up basic window

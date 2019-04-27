@@ -5,4 +5,5 @@
   <li>ttk.Button</li>
   <li>ttk.Checkbutton</li>
   <li>ttk.Combobox</li>
+  <li>ttk.Label</li>
  </ul>

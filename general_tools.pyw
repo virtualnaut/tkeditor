@@ -4,6 +4,7 @@
 #    project.
 
 import time
+from tkinter import PhotoImage
 
 # This will be used to read the CSV file which contains the properties
 #   and names of the widgets.
@@ -155,6 +156,17 @@ def keyword_convert(properties):
         keywords[key] = val
 
     return keywords
+
+def image_remove(keyword_props):
+    new_dict = {}
+    for key in keyword_props.keys():
+        if key != "image":
+            new_dict[key] = keyword_props[key]
+        
+    return new_dict
+
+def image_unstring(string):
+    return PhotoImage(file=string[20:-2])
     
 def prompt_type(prop, additional):
     valid_props = ["width", "height", "text", "image", "cursor",
@@ -183,7 +195,9 @@ def prompt_type(prop, additional):
                     "single_preload":additional}
         
         elif prop == "image":
-            return {"window_type":"Single"}
+            return {"window_type":"Explorer",
+                    "title":None,
+                    "message":None}
         
         elif prop == "cursor":
             return {"window_type":"Dropdown",
