@@ -67,16 +67,17 @@ class display_window:
             self.disp_widg[widget[1]].place(x = int((widget[3].replace(" ",""))[2:]),
                                             y = int((widget[4].replace(" ",""))[2:]))
             
-            if self.selection_ui.displaying == widget[1]:
-                self.disp_widg[widget[1]].movement.select_effect()
-                
             if "image" in keyworded.keys():
                 # Keep image reference
                 if keyworded["image"] != None:
                     self.widget_manager.images[widget[1]] = gt.image_unstring(keyworded["image"])
                     
                     self.disp_widg[widget[1]].config(image = self.widget_manager.images[widget[1]])
-
+            
+            if self.selection_ui.displaying == widget[1]:
+                self.disp_widg[widget[1]].movement.select_effect()
+                
+                
         # Update coords
         for key in self.disp_widg.keys():
             self.widget_manager.edit_widget(key, "x", self.disp_widg[key].x)
@@ -714,8 +715,15 @@ class menu_ui:
     def __new(self):
         if messagebox.askyesno("New Project", "Starting a new project will clear everything you have not saved.\nAre you sure you want to start a new project?"):
             self.widget_manager.root = ["tk.Tk", "root", defaults.ROOT_WIDTH, defaults.ROOT_HEIGHT, [], [defaults.root_methods()], []]
+            
+            # Deselect everything
+            for identifier in self.display_ui.disp_widg.keys():
+                self.display_ui.disp_widg[identifier].movement.deselect()
+            
+            # Reset everything
             self.widget_manager.widgets = []
             self.widget_manager.location = {}
+            self.widget_manager.images = {}
             self.widget_manager.root_update_required = True
             
             self.display_ui.refresh()
@@ -842,7 +850,12 @@ class prompt_ui():
                 self.root.bind("<Escape>", lambda event: self.__cancel())
 
             elif window_type == "Explorer":
-                self.result = [True,"tk.PhotoImage(file='"+filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))+"')"]
+                img_path = filedialog.askopenfilename(initialdir = "C:/", title = "Please Select an Image", filetypes = (("PNG files", "*.png"), ("JPG files", "*.jpg"), ("JPEG files", "*.jpeg"), ("All types", "*.*")))
+                if img_path != "":
+                    self.result = [True,"tk.PhotoImage(file='"+img_path+"')"]
+                else:
+                    self.result = [False, None]
+                
             elif (window_type == "Tuple") or (window_type == "Checkbox"):
                 if window_type == "Checkbox":
                     tuple_elements = 1
