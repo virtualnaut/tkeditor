@@ -41,6 +41,8 @@ class display_window:
         self.root.bind("<Down>", lambda event: self.__arrow_move("d"))
         self.root.bind("<Left>", lambda event: self.__arrow_move("l"))
         self.root.bind("<Right>", lambda event: self.__arrow_move("r"))
+        
+        self.root.bind("<Delete>", lambda event: self.delete_widget())
 
         # Canvas where selection boxes etc will appear
         self.effect_canv = tk.Canvas(self.root, width = 500, height = 400)
@@ -200,7 +202,15 @@ class display_window:
             
             # Reselect the widget to update the selection box
             self.disp_widg[widget].movement.select()
-
+    
+    def delete_widget(self):
+        if (self.selection_ui.displaying != None) and (self.selection_ui.displaying != "$ROOT$"):
+            self.widget_manager.delete_widget(self.selection_ui.displaying)
+            
+            self.selection_ui.revert()
+            self.refresh()
+            self.effect_canv.delete("all")
+    
 # The widget explorer
 class tree_ui:
     def __init__(self, class_name):

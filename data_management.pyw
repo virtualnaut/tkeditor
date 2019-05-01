@@ -199,6 +199,32 @@ class data_manager:
         props.update(gt.keyword_convert(data[4]))
 
         return props
+    
+    def delete_widget(self, identifier):
+        # Delete all data associated with 'identifier'
+        inv_location = {}
+    
+        for key in self.location.keys():
+            inv_location[self.location[key]] = key
+    
+        inds_to_shift = range(self.location[identifier] + 1, len(self.location))
+    
+        del self.widgets[self.location[identifier]]
+
+        self.location = gt.dict_pair_delete(self.location, identifier)
+    
+        identifiers_to_shift = []
+        for inv_key in inds_to_shift:
+            identifiers_to_shift += [inv_location[inv_key]]
+    
+        for identifier in identifiers_to_shift:
+            self.location[identifier] = self.location[identifier] - 1
+    
+        self.images = gt.dict_pair_delete(self.images, identifier)
+    
+        print(self.widgets)
+        print(self.location)
+    
 """        
 def generate(root, widgets):
     # This function is called by the export method in ui.menu_ui

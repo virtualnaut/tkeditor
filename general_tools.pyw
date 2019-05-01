@@ -417,7 +417,13 @@ def quote_escape(prop):
         return property_strip(prop.replace(" ", "")) + " = " + escaped
     else:
         return prop
-                
+
+def dict_pair_delete(dictionary, del_key):
+    new_dict = {}
+    for key in dictionary.keys():
+        if key != del_key:
+            new_dict[key] = dictionary[key]
+    return new_dict
         
 #print(quote_escape("text = \"thisiss\"ometext\""))
 
