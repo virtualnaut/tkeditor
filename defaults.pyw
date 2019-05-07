@@ -14,6 +14,10 @@ def gen(widget):
         properties = ["values = $NULL$", "takefocus = False", "cursor = $NULL$"]
     elif widget == "ttk.Label":
         properties = ["text = \"Label\"", "image = $NULL$", "cursor = $NULL$"]
+    elif widget == "ttk.Entry":
+        properties = ["width = $NULL$", "justify = $NULL$", "cursor = $NULL$"]
+    elif widget == "ttk.Progressbar":
+        properties = ["length = $NULL$", "orient = \"horizontal\"", "maximum = $NULL$", "mode = \"determinate\"", "cursor = $NULL$"]
 
     return properties
 

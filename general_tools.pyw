@@ -170,7 +170,8 @@ def image_unstring(string):
     
 def prompt_type(prop, additional):
     valid_props = ["width", "height", "text", "image", "cursor",
-                   "takefocus", "values", "justify"]
+                   "takefocus", "values", "justify", "length",
+                   "maximum", "orient", "mode"]
     
     if prop in valid_props:
         if prop == "width":
@@ -237,6 +238,34 @@ def prompt_type(prop, additional):
                     "title":"Justification",
                     "message":"The justification of the text:",
                     "combo_values":["left", "right", "center"],
+                    "combo_preload":additional}
+        
+        elif prop == "length":
+            return {"window_type":"Single",
+                    "title":"Length",
+                    "message":"The length of the widget:",
+                    "single_type":"int",
+                    "single_preload":additional}
+        
+        elif prop == "maximum":
+            return {"window_type":"Single",
+                    "title":"Maximum Value",
+                    "message":"The maximum value the widget can have:",
+                    "single_type":"int",
+                    "single_preload":additional}
+        
+        elif prop == "orient":
+            return {"window_type":"Dropdown",
+                    "title":"Orientation",
+                    "message":"The orientation of the the widget:",
+                    "combo_values":["horizontal","vertical"],
+                    "combo_preload":additional}
+        
+        elif prop == "mode":
+            return {"window_type":"Dropdown",
+                    "title":"Progress Bar Mode",
+                    "message":"Whether the progress bar is determinate or indeterminate:",
+                    "combo_values":["determinate","indeterminate"],
                     "combo_preload":additional}
 
 def property_strip(prop):

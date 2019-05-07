@@ -206,6 +206,72 @@ class mLabel(ttk.Label):
         self.x = x
         self.y = y
         super().place(x = x, y = y)
+        
+class mEntry(ttk.Entry):
+    def __init__(self, parent, effects, **kwargs):
+        # Properties
+        self.prop_dict = kwargs
+        self.x = 0
+        self.y = 0
+        
+        # Raise an error if an invalid keyword is given
+        self.__kwarg_validate(kwargs)
+
+        # Call ttk constructor for this widget
+        super().__init__(parent, **kwargs)
+
+        # Set up bindings and their commands
+        self.movement = mobiliser(self, effects)
+
+    def __kwarg_validate(self, values):
+        # If one of the arguments' keywords is not in 'valid', raise TypeError
+        valid = ["width", "text", "image", "cursor", "justify", "takefocus"]
+        for arg in values.keys():
+            if arg not in valid:
+                raise TypeError("Invalid keyword argument: "+arg)
+
+    def config(self, **kwargs):
+        self.__kwarg_validate(kwargs)
+        self.prop_dict.update(kwargs)
+        super().config(**kwargs)
+
+    def place(self, x, y):
+        self.x = x
+        self.y = y
+        super().place(x = x, y = y)
+        
+class mProgressbar(ttk.Progressbar):
+    def __init__(self, parent, effects, **kwargs):
+        # Properties
+        self.prop_dict = kwargs
+        self.x = 0
+        self.y = 0
+        
+        # Raise an error if an invalid keyword is given
+        self.__kwarg_validate(kwargs)
+
+        # Call ttk constructor for this widget
+        super().__init__(parent, **kwargs)
+
+        # Set up bindings and their commands
+        self.movement = mobiliser(self, effects)
+
+    def __kwarg_validate(self, values):
+        # If one of the arguments' keywords is not in 'valid', raise TypeError
+        valid = ["length", "maximum", "orient", "cursor", "mode", "takefocus"]
+        for arg in values.keys():
+            if arg not in valid:
+                raise TypeError("Invalid keyword argument: "+arg)
+
+    def config(self, **kwargs):
+        self.__kwarg_validate(kwargs)
+        self.prop_dict.update(kwargs)
+        super().config(**kwargs)
+
+    def place(self, x, y):
+        self.x = x
+        self.y = y
+        super().place(x = x, y = y)
 
 def movable(widget_type, parent, effects, **kwargs):
     if widget_type == "ttk.Button":
@@ -216,6 +282,10 @@ def movable(widget_type, parent, effects, **kwargs):
         return mCombobox(parent, effects, **kwargs)
     if widget_type == "ttk.Label":
         return mLabel(parent, effects, **kwargs)
+    if widget_type == "ttk.Entry":
+        return mEntry(parent, effects, **kwargs)
+    if widget_type == "ttk.Progressbar":
+        return mProgressbar(parent, effects, **kwargs)
 
 def debug():
     r=tk.Tk()

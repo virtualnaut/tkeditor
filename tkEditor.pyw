@@ -2,7 +2,7 @@
 import data_management as data
 import ui
 
-widget_manager = data.data_manager("tk.Tk", "root")
+widget_manager = data.data_mana+ger("tk.Tk", "root")
 
 select = ui.selection_ui(widget_manager)
 disp = ui.display_window(widget_manager)

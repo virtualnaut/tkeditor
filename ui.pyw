@@ -300,7 +300,7 @@ class add_ui:
         btns = []
 
         order = ["ttk.Button", "ttk.Checkbutton", "ttk.Combobox", "ttk.Entry",
-                 "ttk.Frame", "ttk.Label", "tk.LabelFrame", "ttk.ProgressBar",
+                 "ttk.Frame", "ttk.Label", "tk.LabelFrame", "ttk.Progressbar",
                  "ttk.Radiobutton", "ttk.Scale", "ttk.Separator",
                  "ttk.Treeview", "tk.Canvas", "tk.Listbox", "tk.Message",
                  "tk.OptionMenu", "tk.Spinbox", "tk.Text"]

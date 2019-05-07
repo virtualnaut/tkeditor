@@ -6,4 +6,6 @@
   <li>ttk.Checkbutton</li>
   <li>ttk.Combobox</li>
   <li>ttk.Label</li>
+  <li>ttk.Entry</li>
+  <li>ttk.Progressbar</li>
  </ul>
