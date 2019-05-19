@@ -278,11 +278,11 @@ class add_ui:
                 tk.PhotoImage(file="./resources/c_btn.png"),
                 tk.PhotoImage(file="./resources/cmbo.png"),
                 tk.PhotoImage(file="./resources/entr.png"),
-                tk.PhotoImage(file="./resources/frame.png"),
                 tk.PhotoImage(file="./resources/lbl.png"),
-                tk.PhotoImage(file="./resources/lblframe.png"),
                 tk.PhotoImage(file="./resources/prog.png"),
-                tk.PhotoImage(file="./resources/r_btn.png"),
+                tk.PhotoImage(file="./resources/widget.png"),
+                tk.PhotoImage(file="./resources/widget.png"),                
+                tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
                 tk.PhotoImage(file="./resources/widget.png"),
@@ -300,7 +300,7 @@ class add_ui:
         btns = []
 
         order = ["ttk.Button", "ttk.Checkbutton", "ttk.Combobox", "ttk.Entry",
-                 "ttk.Frame", "ttk.Label", "tk.LabelFrame", "ttk.Progressbar",
+                 "ttk.Label", "ttk.Progressbar", "ttk.Frame", "tk.LabelFrame",
                  "ttk.Radiobutton", "ttk.Scale", "ttk.Separator",
                  "ttk.Treeview", "tk.Canvas", "tk.Listbox", "tk.Message",
                  "tk.OptionMenu", "tk.Spinbox", "tk.Text"]
@@ -342,11 +342,15 @@ class add_ui:
         #self.root.mainloop()
 
     def __add(self, calling_widget):
-        self.widgets.add_widget(calling_widget, "widget_" + str(self.counter), self.widgets.root[1],
-                                x = 5, y = 5, properties = defaults.gen(calling_widget))
-        
-        self.counter += 1
-        self.display.refresh()
+        try:
+            self.widgets.add_widget(calling_widget, "widget_" + str(self.counter), self.widgets.root[1],
+                                    x = 5, y = 5, properties = defaults.gen(calling_widget))
+            
+            self.counter += 1
+            self.display.refresh()
+            
+        except AttributeError:
+            messagebox.showerror("Not Implemented", "This widget has not yet been implemented, this error should not show in final version.")
 
 class selection_ui:
     def __init__(self, widget_manager):
