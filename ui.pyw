@@ -528,7 +528,7 @@ class selection_ui:
                                 messagebox.showerror("Identifier Error", "The identifier you specified is empty.\nThe identifier has been reverted to its original value.")
                                 
                     elif selected == "X-Coord":
-                        
+                        print(value[1])
                         validation_result = gt.coord_validate(value[1], self.widgets.widgets[self.widgets.location[self.displaying]][4], self.widgets.root[2], self.widgets.root[3])
                         
                         if validation_result[0] == True:
@@ -1058,7 +1058,9 @@ class prompt_ui():
     def __accept(self):
         self.root.grab_release()
         if self.window_type == "Single":
-            value = self.input.get()
+            value = self.input_txt.get()
+            
+            print(value)
             
             if self.single_type == "string":
                 value = "\"" + value + "\""

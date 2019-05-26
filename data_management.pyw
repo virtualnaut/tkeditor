@@ -105,6 +105,9 @@ class data_manager:
         for ii in range(ord("a"), ord("z")):
             alphabet += [chr(ii)]
             
+            for ii in range(ord("A"), ord("Z")):
+                alphabet += [chr(ii)]        
+            
         valid_chars = digits + alphabet + ["_"]
         
         if (identifier in self.location.keys()) or (identifier == "$ROOT$") :

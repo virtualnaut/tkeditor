@@ -300,12 +300,14 @@ def coord_validate(x, y, window_width, window_height, buffer = 5, negative_check
     if (type(x) == str) and (type(y) == str): 
         x = x.replace(" ", "")
         y = y.replace(" ", "")
+
+        if "x=" in x:
+            if x[1] == "=":
+                x = x[2:]
         
-        if x[1] == "=":
-            x = x[2:]
-        
-        if y[1] == "=":
-            y = y[2:]
+        if "y=" in y:
+            if y[1] == "=":
+                y = y[2:]
             
         x = int(x)
         y = int(y)
