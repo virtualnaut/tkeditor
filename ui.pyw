@@ -246,7 +246,8 @@ class add_ui:
         
         # Set up basic window
         self.root = tk.Toplevel()
-        self.root.geometry("408x329")
+        #self.root.geometry("408x329")
+        self.root.geometry("408x170")
     
         self.root.title("tkEditor - Add Widgets")
         
@@ -279,19 +280,7 @@ class add_ui:
                 tk.PhotoImage(file="./resources/cmbo.png"),
                 tk.PhotoImage(file="./resources/entr.png"),
                 tk.PhotoImage(file="./resources/lbl.png"),
-                tk.PhotoImage(file="./resources/prog.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),                
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png"),
-                tk.PhotoImage(file="./resources/widget.png")]
+                tk.PhotoImage(file="./resources/prog.png")]
 
         bg_unhov = tk.PhotoImage(file = "./resources/bg_unhov.png")
         bg_hov = tk.PhotoImage(file = "./resources/bg_hov.png")
@@ -372,7 +361,7 @@ class selection_ui:
         self.root.geometry("300x500")   # Size of the window
         
         #self.root.iconbitmap()         # Window's icon
-        self.root.title("Selection")    # The title of the window
+        self.root.title("tkEditor - Selection")    # The title of the window
 
         # Stop the user being able to resize the window
         self.root.resizable(False, False)
@@ -622,7 +611,7 @@ class menu_ui:
         self.root = tk.Toplevel()
         self.root.geometry("461x100")
         self.root.resizable(False, False)
-        self.root.title("Menu")
+        self.root.title("tkEditor - Menu")
         self.root.iconbitmap("./resources/icon.ico")
         
         # Buttons
