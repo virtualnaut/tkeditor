@@ -204,21 +204,21 @@ def prompt_type(prop, additional):
             return {"window_type":"Dropdown",
                     "title":"Cursor",
                     "message":"Please select a cursor to be displayed on hovering:",
-                    "combo_values":["arrow", "based_arrow_down", "based_arrow_up", "boat", "bogosity",
-                                    "bottom_left_corner", "bottom_right_corner", "bottom_side", "bottom_tee",
-                                    "box_spiral", "center_ptr", "circle", "clock", "coffee_mug", "cross",
-                                    "cross_reverse", "crosshair", "diamond_cross", "dot", "dotbox",
-                                    "double_arrow", "draft_large", "draft_small", "draped_box", "exchange",
-                                    "fleur", "gobbler", "gumby", "hand1", "hand2", "heart", "icon",
-                                    "iron_cross", "left_ptr", "left_side", "left_tee", "leftbutton",
-                                    "ll_angle", "lr_angle", "man", "middlebutton", "mouse", "pencil",
-                                    "pirate", "plus", "question_arrow", "right_ptr", "right_side",
-                                    "right_tee", "rightbutton", "rtl_logo", "sailboat", "sb_down_arrow",
-                                    "sb_h_double_arrow", "sb_left_arrow", "sb_right_arrow", "sb_up_arrow",
-                                    "sb_v_double_arrow", "shuttle", "sizing", "spider", "spraycan", "star",
-                                    "target", "tcross", "top_left_arrow", "top_left_corner", "top_right_corner",
-                                    "top_side", "top_tee", "trek", "ul_angle", "umbrella", "ur_angle", "watch",
-                                    "xterm", "X_cursor"],
+                    "combo_values":["\"arrow\"", "\"based_arrow_down\"", "\"based_arrow_up\"", "\"boat\"", "\"bogosity\"",
+                                    "\"bottom_left_corner\"", "\"bottom_right_corner\"", "\"bottom_side\"", "\"bottom_tee\"",
+                                    "\"box_spiral\"", "\"center_ptr\"", "\"circle\"", "\"clock\"", "\"coffee_mug\"", "\"cross\"",
+                                    "\"cross_reverse\"", "\"crosshair\"", "\"diamond_cross\"", "\"dot\"", "\"dotbox\"",
+                                    "\"double_arrow\"", "\"draft_large\"", "\"draft_small\"", "\"draped_box\"", "\"exchange\"",
+                                    "\"fleur\"", "\"gobbler\"", "\"gumby\"", "\"hand1\"", "\"hand2\"", "\"heart\"", "\"icon\"",
+                                    "\"iron_cross\"", "\"left_ptr\"", "\"left_side\"", "\"left_tee\"", "\"leftbutton\"",
+                                    "\"ll_angle\"", "\"lr_angle\"", "\"man\"", "\"middlebutton\"", "\"mouse\"", "\"pencil\"",
+                                    "\"pirate\"", "\"plus\"", "\"question_arrow\"", "\"right_ptr\"", "\"right_side\"",
+                                    "\"right_tee\"", "\"rightbutton\"", "\"rtl_logo\"", "\"sailboat\"", "\"sb_down_arrow\"",
+                                    "\"sb_h_double_arrow\"", "\"sb_left_arrow\"", "\"sb_right_arrow\"", "\"sb_up_arrow\"",
+                                    "\"sb_v_double_arrow\"", "\"shuttle\"", "\"sizing\"", "\"spider\"", "\"spraycan\"", "\"star\"",
+                                    "\"target\"", "\"tcross\"", "\"top_left_arrow\"", "\"top_left_corner\"", "\"top_right_corner\"",
+                                    "\"top_side\"", "\"top_tee\"", "\"trek\"", "\"ul_angle\"", "\"umbrella\"", "\"ur_angle\"", "\"watch\"",
+                                    "\"xterm\"", "\"X_cursor\""],
                     "combo_preload":additional} 
         
         elif prop == "takefocus":
@@ -237,7 +237,7 @@ def prompt_type(prop, additional):
             return {"window_type":"Dropdown",
                     "title":"Justification",
                     "message":"The justification of the text:",
-                    "combo_values":["left", "right", "center"],
+                    "combo_values":["\"left\"", "\"right\"", "\"center\""],
                     "combo_preload":additional}
         
         elif prop == "length":
@@ -258,14 +258,14 @@ def prompt_type(prop, additional):
             return {"window_type":"Dropdown",
                     "title":"Orientation",
                     "message":"The orientation of the the widget:",
-                    "combo_values":["horizontal","vertical"],
+                    "combo_values":["\"horizontal\"","\"vertical\""],
                     "combo_preload":additional}
         
         elif prop == "mode":
             return {"window_type":"Dropdown",
                     "title":"Progress Bar Mode",
                     "message":"Whether the progress bar is determinate or indeterminate:",
-                    "combo_values":["determinate","indeterminate"],
+                    "combo_values":["\"determinate\"","\"indeterminate\""],
                     "combo_preload":additional}
 
 def property_strip(prop):
